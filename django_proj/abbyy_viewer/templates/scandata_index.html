@@ -1,0 +1,10 @@
+<h2>Available Scanned Datasets</h2>
+{% if scandatasets %}
+    <ul>
+    {% for scandata in scandatasets %}
+        <li><a href="/abbyy_viewer/{{ scandata }}">{{ scandata }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No scan datasets are available.</p>
+{% endif %}

@@ -1,0 +1,8 @@
+<h2>Scanned Dataset: {{ scan_id }}</h2>
+
+<h3>{{ pages|length }} pages</h3>
+
+{% for page in pages %}
+	<p>Page: {{ forloop.counter }}</p>
+	<img src="/scandata/{{ scan_id }}/flippy_{{ forloop.counter0 }}.jp2" />
+{% endfor %}
