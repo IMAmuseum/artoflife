@@ -1,0 +1,1 @@
+This folder is intended for testing sets from the Art of Life scandata from the Internet Archive. For each book create a folder with the scan files from the Internet Archive.
