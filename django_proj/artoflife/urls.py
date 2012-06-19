@@ -18,6 +18,6 @@ urlpatterns = patterns('',
     # A view screen for abbyy scan data
     url(r'^abbyy_viewer/$', 'abbyy_viewer.views.scandata'),
     url(r'^abbyy_viewer/(?P<scan_id>.+)$', 'abbyy_viewer.views.scandata'),
-    url(r'^scandata/(?P<scan_id>.+)/jp2_(?P<index>.jp2\d+)$', 'abbyy_viewer.views.jp2_image'),
-    url(r'^scandata/(?P<scan_id>.+)/flippy_(?P<index>.jp2\d+)$', 'abbyy_viewer.views.flippy_image'),
+    url(r'^scandata/(?P<scan_id>.+)/jp2_(?P<index>\d+)\.jp2$', 'abbyy_viewer.views.jp2_image'),
+    url(r'^scandata/(?P<scan_id>.+)/flippy_(?P<index>\d+)\.jpg$', 'abbyy_viewer.views.flippy_image'),
 )

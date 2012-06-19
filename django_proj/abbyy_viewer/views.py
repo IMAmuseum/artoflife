@@ -50,8 +50,9 @@ def jp2_image(request, scan_id, index):
     fs = sc()
 
     image_zip = zipfile.ZipFile(fs.path('scandata/%s/%s_jp2.zip' % (scan_id, scan_id)))
-    image_data = image_zip.open('%s_%04d.jp2' % (scan_id, index))
+    image_data = image_zip.open('%s_%04d.jp2' % (scan_id, int(index))
 
+    # This is throwing a syntax error...
     response = HttpResponse(image_data, content_type="image/jp2")
     return response
 
@@ -65,7 +66,7 @@ def flippy_image(request, scan_id, index):
     fs = sc()
 
     image_zip = zipfile.ZipFile(fs.path('scandata/%s/%s_flippy.zip' % (scan_id, scan_id)))
-    image_data = image_zip.open('%04d.jp2' % (index + 1,))
+    image_data = image_zip.open('%04d.jpg' % (int(index) + 1,))
 
-    response = HttpResponse(image_data, content_type="image/jp2")
+    response = HttpResponse(image_data, content_type="image/jpg")
     return response
