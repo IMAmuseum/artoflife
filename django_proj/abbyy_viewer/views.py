@@ -40,6 +40,42 @@ def scandata(request, scan_id=None):
         'pages': pages,
     })
 
+def picture_blocks(request, scan_id):
+    """
+    Display a list of scans that include ABBYY picture picture_blocks
+    """
+    sc = storage.get_storage_class()
+    fs = sc()
+
+    abbyy_file = fs.path('scandata/%s/%s_abbyy.gz' % (scan_id, scan_id))
+    if not fs.exists('scandata/' + scan_id):
+        raise Http404
+    if not os.path.isfile(abbyy_file):
+        raise Exception('Unable to find abbyy scan file: %s' % abbyy_file)
+
+    print 'parsing abbyy'
+    abbyy = ET.parse(gzip.open(abbyy_file))
+    print 'finding pages'
+    pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
+    print 'found', len(pages), 'pages'
+    picture_pages = []
+    indices = []
+    index = 0
+    for page in pages:
+        pblocks = page.findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block[@blockType='Picture']")
+        if len(pblocks) > 0:
+            print len(pblocks)
+            picture_pages.append(page)
+            indices.append(index)
+        index += 1
+    print indices
+
+    return render_to_response('jp2_list.html', {
+        'scan_id': scan_id,
+        'abbyy': abbyy,
+        'jp2_indices': indices
+    })    
+
 def jp2_image(request, scan_id, index):
     """
     Return the raw contents of a scanned image

@@ -1,0 +1,7 @@
+<h2>JP2 List</h2>
+<p>{{ jp2_indices|length }} pages:</p>
+<ul>
+  {% for jp2_index in jp2_indices %}
+    <li><a href="/scandata/{{scan_id}}/jp2_{{jp2_index}}.jp2">{{ jp2_index }}</a></li>
+  {% endfor %}
+</ul>
