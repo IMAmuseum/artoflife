@@ -40,7 +40,6 @@ def scandata(request, scan_id=None):
         'pages': pages,
     })
 
-
 def jp2_image(request, scan_id, index):
     """
     Return the raw contents of a scanned image
@@ -49,8 +48,13 @@ def jp2_image(request, scan_id, index):
     sc = storage.get_storage_class()
     fs = sc()
 
-    image_zip = zipfile.ZipFile(fs.path('scandata/%s/%s_jp2.zip' % (scan_id, scan_id)))
-    image_data = image_zip.open('%s_%04d.jp2' % (scan_id, int(index)))
+    zip_filename = fs.path('scandata/%s/%s_jp2.zip' % (scan_id, scan_id))
+    print 'Opening', zip_filename
+    image_zip = zipfile.ZipFile(zip_filename)
+
+    file_name = '%s_jp2/%s_%04d.jp2' % (scan_id, scan_id, int(index))
+    print 'Extracting', file_name
+    image_data = image_zip.open(file_name)
 
     response = HttpResponse(image_data, content_type="image/jp2")
     return response
@@ -64,8 +68,14 @@ def flippy_image(request, scan_id, index):
     sc = storage.get_storage_class()
     fs = sc()
 
-    image_zip = zipfile.ZipFile(fs.path('scandata/%s/%s_flippy.zip' % (scan_id, scan_id)))
-    image_data = image_zip.open('%04d.jpg' % (int(index) + 1,))
+    try:
+        image_zip = zipfile.ZipFile(fs.path('scandata/%s/%s_flippy.zip' % (scan_id, scan_id)))
+    except IOError:
+        return HttpResponse('No flippy zip file')
+
+    file_name = '%04d.jpg' % (int(index) + 1,)
+    print 'Extracting', file_name
+    image_data = image_zip.open(file_name)
 
     response = HttpResponse(image_data, content_type="image/jpg")
     return response
