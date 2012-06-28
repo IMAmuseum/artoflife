@@ -3,3 +3,5 @@
 
 # scan data used for testing
 django_proj/scandata/*
+
+django_proj/tmp/*

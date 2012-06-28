@@ -1,0 +1,7 @@
+<h2>Picture Blocks</h2>
+<p>{{ indices|length }} pages:</p>
+<ul>
+  {% for index in indices %}
+    <li><a href="/picture_blocks/{{scan_id}}/{{index}}.png">{{ index }}</a></li>
+  {% endfor %}
+</ul>

@@ -2,10 +2,9 @@ from django.shortcuts import render_to_response
 from django.core.files import storage
 from django.http import HttpResponse, Http404
 
-import os
-import glob
-import gzip
-import zipfile
+import glob, gzip, os, subprocess, zipfile
+
+from PIL import Image, ImageDraw
 from xml.etree import cElementTree as ET
 
 
@@ -40,10 +39,11 @@ def scandata(request, scan_id=None):
         'pages': pages,
     })
 
-def picture_blocks(request, scan_id):
+def picture_block_index(request, scan_id):
     """
     Display a list of scans that include ABBYY picture picture_blocks
     """
+    print "Picture block index"
     sc = storage.get_storage_class()
     fs = sc()
 
@@ -64,17 +64,82 @@ def picture_blocks(request, scan_id):
     for page in pages:
         pblocks = page.findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block[@blockType='Picture']")
         if len(pblocks) > 0:
-            print len(pblocks)
             picture_pages.append(page)
             indices.append(index)
+            generate_picture_blocks(scan_id, index, 'png', pblocks)
         index += 1
-    print indices
+    print 'Pages with picture blocks:', indices
 
-    return render_to_response('jp2_list.html', {
+    return render_to_response('picture_blocks.html', {
         'scan_id': scan_id,
         'abbyy': abbyy,
-        'jp2_indices': indices
-    })    
+        'indices': indices
+    })
+
+
+def generate_picture_blocks(scan_id, index, ext='png', pblocks=[]):
+    """
+    Display a scan with a picture blocks overlay
+    """
+    print "Picture blocks for", index
+    sc = storage.get_storage_class()
+    fs = sc()
+
+    img_file = 'tmp/%s_jp2/%s_%04d.%s' % (scan_id, scan_id, int(index), ext)
+    if fs.exists(img_file):
+        return fs.path(img_file)
+
+    zip_filename = fs.path('scandata/%s/%s_jp2.zip' % (scan_id, scan_id))
+    print 'Opening', zip_filename
+    image_zip = zipfile.ZipFile(zip_filename)
+
+    file_name = '%s_jp2/%s_%04d.jp2' % (scan_id, scan_id, int(index))
+    print 'Extracting', file_name
+    image_zip.extract(file_name, fs.path('tmp'))
+
+    print 'Converting to', img_file
+
+    subprocess.check_call([
+        "j2k_to_image",
+        '-i', os.path.join(fs.path('tmp'), file_name),
+        '-o', fs.path(img_file)
+    ])
+
+    img = Image.open(fs.path(img_file))
+
+    # Do processing
+    size = img.size
+    print size
+
+    scale = 0.2
+    small = img.resize([int(size[0]*scale), int(size[1]*scale)])
+
+    draw = ImageDraw.Draw(small)
+    for block in pblocks:
+        print block.attrib
+        draw.rectangle(
+            [
+                (float(block.attrib['l'])*scale, float(block.attrib['t'])*scale),
+                (float(block.attrib['r'])*scale, float(block.attrib['b'])*scale)
+            ],
+            outline=(0,255,0)
+        )
+    del draw
+
+    small.save(fs.path(img_file))
+    del img
+
+    os.remove(os.path.join(fs.path('tmp'), file_name))
+
+    return fs.path(img_file)
+
+
+def picture_blocks(request, scan_id, index, ext='png'):
+
+    img_file = generate_picture_blocks(scan_id, index, ext)
+
+    return HttpResponse(open(img_file), content_type='image/' + ext)
+
 
 def jp2_image(request, scan_id, index):
     """
