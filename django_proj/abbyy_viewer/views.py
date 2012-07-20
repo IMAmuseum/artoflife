@@ -47,30 +47,32 @@ def picture_block_index(request, scan_id):
     sc = storage.get_storage_class()
     fs = sc()
 
+    # Check resources
     abbyy_file = fs.path('scandata/%s/%s_abbyy.gz' % (scan_id, scan_id))
+    scandata_file = fs.path('scandata/%s/%s_scandata.xml' % (scan_id, scan_id))
     if not fs.exists('scandata/' + scan_id):
         raise Http404
     if not os.path.isfile(abbyy_file):
         raise Exception('Unable to find abbyy scan file: %s' % abbyy_file)
+    if not os.path.isfile(scandata_file):
+        raise Exception('Unable to find scandata file: %s' % scandata_file)
 
     print 'parsing scandata'
-    scan_data = ET.parse(fs.path('scandata/%s/%s_scandata.xml' % (scan_id, scan_id)))
-    print scan_data
-    sd_pages = scan_data.find('pageData').findall('page')
-    print 'found', len(sd_pages), 'in scan data'
+    scandata = ET.parse(scandata_file)
+    scandata_pages = scandata.find('pageData').findall('page')
+    print 'found', len(scandata_pages), 'in scan data'
 
     print 'parsing abbyy'
     abbyy = ET.parse(gzip.open(abbyy_file))
-    print 'finding pages'
-    pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
-    print 'found', len(pages), 'pages'
+    abbyy_pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
+    print 'found', len(abbyy_pages), 'pages'
 
     picture_pages = []
     indices = []
 
     orig_index = 0
     ia_index = 0
-    for page in sd_pages:
+    for page in scandata_pages:
 
         # Skip 'delete' pages
         if page.find('pageType').text == 'Delete':
@@ -78,11 +80,9 @@ def picture_block_index(request, scan_id):
             continue
 
         # Are there picture blocks on this page?
-        pblocks = pages[orig_index].findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block[@blockType='Picture']")
+        pblocks = abbyy_pages[orig_index].findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block[@blockType='Picture']")
         if len(pblocks) > 0:
-            print 'picture blocks on', orig_index
-
-            picture_pages.append(pages[orig_index])
+            picture_pages.append(abbyy_pages[orig_index])
             indices.append(orig_index)
             generate_picture_blocks(scan_id, orig_index, 'png', pblocks)
 
