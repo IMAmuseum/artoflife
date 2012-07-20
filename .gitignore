@@ -5,3 +5,5 @@
 django_proj/scandata/*
 
 django_proj/tmp/*
+
+.DS_Store

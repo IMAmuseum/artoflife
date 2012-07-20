@@ -53,21 +53,42 @@ def picture_block_index(request, scan_id):
     if not os.path.isfile(abbyy_file):
         raise Exception('Unable to find abbyy scan file: %s' % abbyy_file)
 
+    print 'parsing scandata'
+    scan_data = ET.parse(fs.path('scandata/%s/%s_scandata.xml' % (scan_id, scan_id)))
+    print scan_data
+    sd_pages = scan_data.find('pageData').findall('page')
+    print 'found', len(sd_pages), 'in scan data'
+
     print 'parsing abbyy'
     abbyy = ET.parse(gzip.open(abbyy_file))
     print 'finding pages'
     pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
     print 'found', len(pages), 'pages'
+
     picture_pages = []
     indices = []
-    index = 0
-    for page in pages:
-        pblocks = page.findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block[@blockType='Picture']")
+
+    orig_index = 0
+    ia_index = 0
+    for page in sd_pages:
+
+        # Skip 'delete' pages
+        if page.find('pageType').text == 'Delete':
+            orig_index += 1
+            continue
+
+        # Are there picture blocks on this page?
+        pblocks = pages[orig_index].findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block[@blockType='Picture']")
         if len(pblocks) > 0:
-            picture_pages.append(page)
-            indices.append(index)
-            generate_picture_blocks(scan_id, index, 'png', pblocks)
-        index += 1
+            print 'picture blocks on', orig_index
+
+            picture_pages.append(pages[orig_index])
+            indices.append(orig_index)
+            generate_picture_blocks(scan_id, orig_index, 'png', pblocks)
+
+        ia_index += 1
+        orig_index += 1
+
     print 'Pages with picture blocks:', indices
 
     return render_to_response('picture_blocks.html', {
