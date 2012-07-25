@@ -4,7 +4,8 @@ from time import clock
 from helpers import getIAImage
 
 benchmarks = {
-    'image_processing': []
+    'image_processing': [],
+    'single_dim': []
 }
 
 
@@ -43,6 +44,8 @@ def processPage(scan_id, ia_page_index, scandata_page):
     convert(working_file, '-contrast -contrast -contrast -contrast -contrast -contrast -contrast -contrast')
     #img = ImageOps.autocontrast(img, 5)
 
+    t1 = clock()
+
     # resize to 1px width
     convert(working_file, '-resize 1x500!')
     #w_compressed = ImageOps.equalize(img.resize((1, size[1]), Image.BILINEAR))
@@ -77,7 +80,10 @@ def processPage(scan_id, ia_page_index, scandata_page):
 
     del img
 
-    benchmarks['image_processing'].append(clock() - t0)
+    tf = clock()
+
+    benchmarks['image_processing'].append(tf - t0)
+    benchmarks['single_dim'].append(tf - t1)
 
     return info
 
@@ -121,9 +127,24 @@ if __name__ == '__main__':
             elif (i == args.page):
                 break
             ia_page_index += 1
+            if (ia_page_index > 10):
+                break
+
+    import csv
+    output_filename = 'output/contrast/%s.csv' % scan_id
+    if not os.path.exists(os.path.dirname(output_filename)):
+        os.mkdir(os.path.dirname(output_filename))
+
+    output_file = open(output_filename, 'w')
+    writer = csv.writer(output_file)
+    writer.writerow(['IA page', 'Image detected', 'Processing time', '1D'])
 
     for p in range(0, len(results)):
+        writer.writerow([p, results[p]['image_detected'], benchmarks['image_processing'][p], benchmarks['single_dim'][p]])
         if (results[p]['image_detected']):
             print 'Image detected on page', p
 
+    output_file.close()
     print 'Avg image processing time:', average(benchmarks['image_processing']), 's'
+    print 'Avg time for single dimension:', average(benchmarks['single_dim']), 's'
+
