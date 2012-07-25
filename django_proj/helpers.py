@@ -5,6 +5,20 @@ from urllib import urlopen
 from PIL import Image
 
 
+def combinePageData(scandata_pages, abbyy_pages, include_deleted=False):
+
+    pages = []
+    for i in range(0, len(scandata_pages)):
+        if (not include_deleted) and (scandata_pages[i].find('pageType').text == 'Delete'):
+            continue
+        pages.append({
+            'scandata': scandata_pages[i],
+            'abbyy': abbyy_pages[i]
+        })
+
+    return pages
+
+
 def getIAImage(book_id, ia_page_index):
 
     tmp_file = 'tmp/ia/%s/%s.jpeg' % (book_id, ia_page_index)
@@ -30,15 +44,11 @@ def getIAImage(book_id, ia_page_index):
     return image
 
 
-def combinePageData(scandata_pages, abbyy_pages, include_deleted=False):
-
-    pages = []
-    for i in range(0, len(scandata_pages)):
-        if (not include_deleted) and (scandata_pages[i].find('pageType').text == 'Delete'):
+def scanIndexForIAIndex(ia_index, scandata_pages):
+    index = 0
+    for scan_index in range(0, len(scandata_pages)):
+        if scandata_pages[scan_index].find('pageType').text == 'Delete':
             continue
-        pages.append({
-            'scandata': scandata_pages[i],
-            'abbyy': abbyy_pages[i]
-        })
-
-    return pages
+        if int(index) == int(ia_index):
+            return scan_index
+        index += 1

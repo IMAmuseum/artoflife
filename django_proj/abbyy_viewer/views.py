@@ -7,43 +7,12 @@ import glob, gzip, os, subprocess, zipfile
 from PIL import Image, ImageDraw
 from xml.etree import cElementTree as ET
 
+import pictureblocks
+from helpers import scanIndexForIAIndex
 
-def scandata(request, scan_id=None):
-    """
-    Display a listing of scan datasets in "static/scandata"
-    """
-    sc = storage.get_storage_class()
-    fs = sc()
 
-    if scan_id is None:
-        scandatasets = [os.path.basename(sd) for sd in glob.glob(fs.path('scandata') + '/*')]
-        return render_to_response('scandata_index.html', {
-            'scandatasets': scandatasets,
-        })
+def loadXml(scan_id):
 
-    if not fs.exists('scandata/' + scan_id):
-        raise Http404
-
-    abbyy_file = fs.path('scandata/%s/%s_abbyy.gz' % (scan_id, scan_id))
-    if not fs.exists('scandata/' + scan_id):
-        raise Http404
-    if not os.path.isfile(abbyy_file):
-        raise Exception('Unable to find abbyy scan file: %s' % abbyy_file)
-
-    abbyy = ET.parse(gzip.open(abbyy_file))
-    pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
-
-    return render_to_response('scandata.html', {
-        'scan_id': scan_id,
-        'abbyy': abbyy,
-        'pages': pages,
-    })
-
-def picture_block_index(request, scan_id):
-    """
-    Display a list of scans that include ABBYY picture picture_blocks
-    """
-    print "Picture block index"
     sc = storage.get_storage_class()
     fs = sc()
 
@@ -57,108 +26,86 @@ def picture_block_index(request, scan_id):
     if not os.path.isfile(scandata_file):
         raise Exception('Unable to find scandata file: %s' % scandata_file)
 
-    print 'parsing scandata'
-    scandata = ET.parse(scandata_file)
-    scandata_pages = scandata.find('pageData').findall('page')
+    return {
+        'abbyy': ET.parse(gzip.open(abbyy_file)),
+        'scandata': ET.parse(scandata_file)
+    }
+
+
+def scandata(request, scan_id=None):
+    """
+    Display a listing of scan datasets in "static/scandata"
+    """
+
+    xml_data = loadXml(scan_id)
+    pages = xml_data['abbyy'].findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
+
+    return render_to_response('scandata.html', {
+        'scan_id': scan_id,
+        'abbyy': xml_data['abbyy'],
+        'pages': pages,
+    })
+
+
+def picture_block_index(request, scan_id):
+    """
+    Display a list of scans that include ABBYY picture picture_blocks
+    """
+    print "Picture block index"
+
+    xml_data = loadXml(scan_id)
+
+    scandata_pages = xml_data['scandata'].find('pageData').findall('page')
     print 'found', len(scandata_pages), 'in scan data'
 
     print 'parsing abbyy'
-    abbyy = ET.parse(gzip.open(abbyy_file))
-    abbyy_pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
+    abbyy_pages = xml_data['abbyy'].findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
     print 'found', len(abbyy_pages), 'pages'
 
     picture_pages = []
     indices = []
 
-    orig_index = 0
+    scan_index = 0
     ia_index = 0
     for page in scandata_pages:
 
         # Skip 'delete' pages
         if page.find('pageType').text == 'Delete':
-            orig_index += 1
+            scan_index += 1
             continue
 
         # Are there picture blocks on this page?
-        pblocks = abbyy_pages[orig_index].findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block[@blockType='Picture']")
+        pblocks = abbyy_pages[scan_index].findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block[@blockType='Picture']")
         if len(pblocks) > 0:
-            picture_pages.append(abbyy_pages[orig_index])
-            indices.append(orig_index)
-            generate_picture_blocks(scan_id, orig_index, 'png', pblocks)
+            picture_pages.append(abbyy_pages[scan_index])
+            indices.append(ia_index)
 
         ia_index += 1
-        orig_index += 1
+        scan_index += 1
 
     print 'Pages with picture blocks:', indices
 
     return render_to_response('picture_blocks.html', {
         'scan_id': scan_id,
-        'abbyy': abbyy,
+        'abbyy': xml_data['abbyy'],
         'indices': indices
     })
 
 
-def generate_picture_blocks(scan_id, index, ext='png', pblocks=[]):
-    """
-    Display a scan with a picture blocks overlay
-    """
-    print "Picture blocks for", index
-    sc = storage.get_storage_class()
-    fs = sc()
-
-    img_file = 'tmp/%s_jp2/%s_%04d.%s' % (scan_id, scan_id, int(index), ext)
-    if fs.exists(img_file):
-        return fs.path(img_file)
-
-    zip_filename = fs.path('scandata/%s/%s_jp2.zip' % (scan_id, scan_id))
-    print 'Opening', zip_filename
-    image_zip = zipfile.ZipFile(zip_filename)
-
-    file_name = '%s_jp2/%s_%04d.jp2' % (scan_id, scan_id, int(index))
-    print 'Extracting', file_name
-    image_zip.extract(file_name, fs.path('tmp'))
-
-    print 'Converting to', img_file
-
-    subprocess.check_call([
-        "j2k_to_image",
-        '-i', os.path.join(fs.path('tmp'), file_name),
-        '-o', fs.path(img_file)
-    ])
-
-    img = Image.open(fs.path(img_file))
-
-    # Do processing
-    size = img.size
-    print size
-
-    scale = 0.2
-    small = img.resize([int(size[0]*scale), int(size[1]*scale)])
-
-    draw = ImageDraw.Draw(small)
-    for block in pblocks:
-        print block.attrib
-        draw.rectangle(
-            [
-                (float(block.attrib['l'])*scale, float(block.attrib['t'])*scale),
-                (float(block.attrib['r'])*scale, float(block.attrib['b'])*scale)
-            ],
-            outline=(0,255,0)
-        )
-    del draw
-
-    small.save(fs.path(img_file))
-    del img
-
-    os.remove(os.path.join(fs.path('tmp'), file_name))
-
-    return fs.path(img_file)
-
-
 def picture_blocks(request, scan_id, index, ext='png'):
+    """
+    index should be the IA page index
+    """
 
-    img_file = generate_picture_blocks(scan_id, index, ext)
+    xml_data = loadXml(scan_id)
+    scandata_pages = xml_data['scandata'].find('pageData').findall('page')
+    abbyy_pages = xml_data['abbyy'].findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
 
+    print 'index', index
+    scan_index = scanIndexForIAIndex(index, scandata_pages)
+    blocks = abbyy_pages[scan_index].findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block[@blockType='Picture']")
+
+    img_file = pictureblocks.renderBlocks(scan_id, index, blocks)
     return HttpResponse(open(img_file), content_type='image/' + ext)
 
 
