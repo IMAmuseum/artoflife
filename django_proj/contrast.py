@@ -131,7 +131,7 @@ if __name__ == '__main__':
                 break
 
     import csv
-    output_filename = 'output/contrast/%s.csv' % scan_id
+    output_filename = 'output/contrast/%s-contrast.csv' % scan_id
     if not os.path.exists(os.path.dirname(output_filename)):
         os.mkdir(os.path.dirname(output_filename))
 

@@ -9,3 +9,7 @@ django_proj/tmp/*
 .DS_Store
 
 django_proj/output/contrast/hallofshells00hard.csv
+
+django_proj/output/pictureblocks/hallofshells00hard-pictureblocks.csv
+
+django_proj/output/pictureblocks/hallofshells00hard.csv

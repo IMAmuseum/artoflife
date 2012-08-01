@@ -51,17 +51,25 @@ def renderBlocks(scan_id, ia_page_index, pblocks, output_width=500):
 
 
 
-def processPage(scan_id, ia_page_index, scandata, abbyy):
-    print 'processing', scan_id, 'IA page', ia_page_index
+def processPage(scan_id, ia_page_index, scandata, abbyy, render=False):
+    #print 'processing', scan_id, 'IA page', ia_page_index
+
+    t0 = clock()
 
     pblocks = abbyy.findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block[@blockType='Picture']")
 
+    info = {
+        'image_detected': (not len(pblocks) == 0),
+        'abbyy_processing': clock() - t0
+    }
+
     if len(pblocks) == 0:
-        return False
+        return info
 
-    renderBlocks(scan_id, ia_page_index, pblocks)
+    if render:
+        renderBlocks(scan_id, ia_page_index, pblocks)
 
-    return True
+    return info
 
 
 if __name__ == '__main__':
@@ -74,6 +82,7 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser(description='picture block processing')
     ap.add_argument('scan', type=str, help='scan id')
     ap.add_argument('--page', type=int, help='page #', default=None)
+    ap.add_argument('--render', type=bool, help='render blocks', default=False)
 
     args = ap.parse_args()
 
@@ -96,17 +105,41 @@ if __name__ == '__main__':
     print 'found', len(abbyy_pages), 'pages from abbyy data in', clock() - t, 's'
 
     if (args.page != None):
-        processPage(scan_id, args.page, scandata_pages[args.page], abbyy_pages[args.page])
+        print processPage(scan_id, args.page, scandata_pages[args.page], abbyy_pages[args.page], args.render)
     else:
+        results = []
         ia_page_index = 0
         for i in range(0, len(scandata_pages)):
             if scandata_pages[i].find('pageType').text == 'Delete':
                 continue
             if (args.page == None):
                 # process all pages
-                processPage(scan_id, ia_page_index, scandata_pages[i], abbyy_pages[i])
+                results.append(processPage(
+                    scan_id,
+                    ia_page_index,
+                    scandata_pages[i],
+                    abbyy_pages[i],
+                    args.render
+                ))
             elif (i == args.page):
                 break
             ia_page_index += 1
 
-    print 'Avg image processing time:', average(benchmarks['image_processing']), 's'
+    import csv
+    output_filename = 'output/pictureblocks/%s-pictureblocks.csv' % scan_id
+    if not os.path.exists(os.path.dirname(output_filename)):
+        os.mkdir(os.path.dirname(output_filename))
+
+    output_file = open(output_filename, 'w')
+    writer = csv.writer(output_file)
+    writer.writerow(['IA page', 'Image detected', 'Processing time'])
+
+    for p in range(0, len(results)):
+        writer.writerow([p, results[p]['image_detected'], results[p]['abbyy_processing']])
+        if (results[p]['image_detected']):
+            print 'Image detected on page', p
+
+    output_file.close()
+
+    if (args.render):
+        print 'Avg image processing time:', average(benchmarks['image_processing']), 's'
