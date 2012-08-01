@@ -127,8 +127,6 @@ if __name__ == '__main__':
             elif (i == args.page):
                 break
             ia_page_index += 1
-            if (ia_page_index > 10):
-                break
 
     import csv
     output_filename = 'output/contrast/%s-contrast.csv' % scan_id
