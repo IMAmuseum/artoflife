@@ -8,16 +8,5 @@ django_proj/tmp/*
 
 .DS_Store
 
-django_proj/output/contrast/hallofshells00hard.csv
-
-django_proj/output/pictureblocks/hallofshells00hard-pictureblocks.csv
-
-django_proj/output/pictureblocks/hallofshells00hard.csv
-
-django_proj/output/contrast/mobot31753002220892-contrast.csv
-
-django_proj/output/pictureblocks/mobot31753002220892-pictureblocks.csv
-
-django_proj/output/contrast/mobot31753002364039-contrast.csv
-
-django_proj/output/pictureblocks/mobot31753002364039-pictureblocks.csv
+django_proj/output/contrast/*.csv
+django_proj/output/pictureblocks/*.csv

@@ -12,7 +12,9 @@ if __name__ == "__main__":
         'contrast', 'pictureblocks'
     ]
 
-    control_file = open('BHLIllustrations.csv', 'rU')
+    input_file = 'BHL-gold-standard.csv'
+
+    control_file = open(input_file, 'rU')
     control_reader = csv.reader(control_file)
     control_reader.next()  # skip header
 
@@ -30,7 +32,7 @@ if __name__ == "__main__":
 
     control_file.close()
 
-    analysis_file = open('output/analysis.csv', 'w')
+    analysis_file = open('output/' + input_file.replace('.csv', '-analysis.csv'), 'w')
     analysis_writer = csv.writer(analysis_file)
 
     header = [
