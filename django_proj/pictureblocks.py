@@ -61,11 +61,22 @@ def processPage(scan_id, ia_page_index, scandata, abbyy, render=False):
     info = {
         'image_detected': (not len(pblocks) == 0),
         'n_picture_blocks': len(pblocks),
-        'abbyy_processing': clock() - t0
+        'abbyy_processing': clock() - t0,
+        'coverage': 0
     }
 
     if len(pblocks) == 0:
         return info
+
+    # calculate page area
+    Ap = float(abbyy.attrib['width']) * float(abbyy.attrib['height'])
+
+    # calculate total picture block area
+    Ab = 0
+    for block in pblocks:
+        Ab += (int(block.attrib['r']) - int(block.attrib['l'])) * (int(block.attrib['b']) - int(block.attrib['t']))
+
+    info['coverage'] = 100 * Ab / Ap
 
     if render:
         renderBlocks(scan_id, ia_page_index, pblocks)
@@ -136,16 +147,19 @@ if __name__ == '__main__':
     writer.writerow([
         'IA page',
         'Image detected',
-        'Processing time'
+        'Processing time',
         '# of picture blocks',
+        '% coverage'
     ])
 
     for p in range(0, len(results)):
+        #print p
         writer.writerow([
             p,
             results[p]['image_detected'],
             results[p]['abbyy_processing'],
-            results[p]['n_picture_blocks']
+            results[p]['n_picture_blocks'],
+            results[p]['coverage']
         ])
         if (results[p]['image_detected']):
             print 'Image detected on page', p
