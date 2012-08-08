@@ -19,6 +19,19 @@ def combinePageData(scandata_pages, abbyy_pages, include_deleted=False):
     return pages
 
 
+def skipScanDataPage(scandata_page):
+    """
+    Determine whether a scandata page should be skipped
+    """
+
+    if scandata_page.find('pageType').text == 'Delete':
+        return True
+    if (int(scandata_page.find('origHeight').text) == 0) and (int(scandata_page.find('origWidth').text) == 0):
+        return True
+
+    return False
+
+
 def getIAImage(book_id, ia_page_index):
 
     tmp_file = 'tmp/ia/%s/%s.jpeg' % (book_id, ia_page_index)

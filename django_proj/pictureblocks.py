@@ -50,7 +50,6 @@ def renderBlocks(scan_id, ia_page_index, pblocks, output_width=500):
     return output_file
 
 
-
 def processPage(scan_id, ia_page_index, scandata, abbyy, render=False):
     #print 'processing', scan_id, 'IA page', ia_page_index
 
@@ -88,8 +87,9 @@ if __name__ == '__main__':
 
     import argparse
     import gzip
-#    from helpers import combinePageData
+    from helpers import skipScanDataPage
     from xml.etree import cElementTree as ET
+    import sys
 
     ap = argparse.ArgumentParser(description='picture block processing')
     ap.add_argument('scan', type=str, help='scan id')
@@ -116,26 +116,27 @@ if __name__ == '__main__':
     abbyy_pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
     print 'found', len(abbyy_pages), 'pages from abbyy data in', clock() - t, 's'
 
+    results = []
+    ia_page_index = 0
+    for i in range(0, len(scandata_pages)):
+        if skipScanDataPage(scandata_pages[i]):
+            continue
+        if (args.page == None):
+            # process all pages
+            results.append(processPage(
+                scan_id,
+                ia_page_index,
+                scandata_pages[i],
+                abbyy_pages[i],
+                args.render
+            ))
+        elif (i == args.page):
+            break
+        ia_page_index += 1
+
     if (args.page != None):
-        print processPage(scan_id, args.page, scandata_pages[args.page], abbyy_pages[args.page], args.render)
-    else:
-        results = []
-        ia_page_index = 0
-        for i in range(0, len(scandata_pages)):
-            if scandata_pages[i].find('pageType').text == 'Delete':
-                continue
-            if (args.page == None):
-                # process all pages
-                results.append(processPage(
-                    scan_id,
-                    ia_page_index,
-                    scandata_pages[i],
-                    abbyy_pages[i],
-                    args.render
-                ))
-            elif (i == args.page):
-                break
-            ia_page_index += 1
+        print processPage(scan_id, ia_page_index, scandata_pages[i], abbyy_pages[i], args.render)
+        sys.exit()
 
     import csv
     output_filename = 'output/pictureblocks/%s-pictureblocks.csv' % scan_id
