@@ -67,6 +67,7 @@ if __name__ == "__main__":
             output_filename = 'output/%s/%s-%s.csv' % (alg, scan, alg)
             if not os.path.exists(output_filename):
                 print output_filename, 'does not exist'
+                result.extend(['', '', ''])
                 continue
 
             alg_file = open(output_filename)
