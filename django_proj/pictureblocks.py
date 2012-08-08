@@ -60,6 +60,7 @@ def processPage(scan_id, ia_page_index, scandata, abbyy, render=False):
 
     info = {
         'image_detected': (not len(pblocks) == 0),
+        'n_picture_blocks': len(pblocks),
         'abbyy_processing': clock() - t0
     }
 
@@ -132,10 +133,20 @@ if __name__ == '__main__':
 
     output_file = open(output_filename, 'w')
     writer = csv.writer(output_file)
-    writer.writerow(['IA page', 'Image detected', 'Processing time'])
+    writer.writerow([
+        'IA page',
+        'Image detected',
+        'Processing time'
+        '# of picture blocks',
+    ])
 
     for p in range(0, len(results)):
-        writer.writerow([p, results[p]['image_detected'], results[p]['abbyy_processing']])
+        writer.writerow([
+            p,
+            results[p]['image_detected'],
+            results[p]['abbyy_processing'],
+            results[p]['n_picture_blocks']
+        ])
         if (results[p]['image_detected']):
             print 'Image detected on page', p
 
