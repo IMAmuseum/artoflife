@@ -109,6 +109,56 @@ def picture_blocks(request, scan_id, index, ext='png'):
     return HttpResponse(open(img_file), content_type='image/' + ext)
 
 
+def picture_blocks_analysis(request, scan_id):
+    """
+    Initial implementation: Render output from a prior run
+    """
+
+    import csv
+
+    sc = storage.get_storage_class()
+    fs = sc()
+
+    log_filepath = fs.path('output/pictureblocks/%s-pictureblocks.csv' % (scan_id))
+    control_filepath = fs.path('BHLIllustrations.csv')
+
+    #print 'Log file:', log_filepath
+    #print 'Control file:', control_filepath
+
+    if not fs.exists(log_filepath) or not fs.exists(control_filepath):
+        raise Http404
+
+    log_file = open(log_filepath, 'rU')
+    control_file = open(control_filepath, 'rU')
+
+    log_reader = csv.reader(log_file)
+    control_reader = csv.reader(control_file)
+
+    log_reader.next()
+    control_reader.next()
+
+    for control_row in control_reader:
+        if control_row[0] == scan_id:
+            break
+
+    n = 0
+    for log_row in log_reader:
+
+        if (log_row[1] == 'True'):
+            print 'detected', n
+
+        control_reader.next()
+        n += 1
+
+    log_file.close()
+    control_file.close()
+
+    return render_to_response('picture_blocks_analysis.html', {
+        'scan_id': scan_id,
+        'n_pages': n
+    })
+
+
 def jp2_image(request, scan_id, index):
     """
     Return the raw contents of a scanned image
