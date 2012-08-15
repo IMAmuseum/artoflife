@@ -1,6 +1,59 @@
+<html>
+<head>
+<style type='text/css'>
+
+.page {
+	margin-bottom: 10px;
+	clear: both;
+}
+
+.page a {
+	float: left;
+	margin-bottom: 10px;
+}
+
+.page .info {
+	float: left;
+}
+
+.page.false-negative img {
+	border: 2px solid red;
+}
+
+.page.false-positive img {
+	border: 2px solid blue;
+}
+
+.page.true-positive img {
+	border: 2px solid green;
+}
+
+</style>
+</head>
+<body>
+
 <h2>Picture Blocks Analysis for {{scan_id}}</h2>
 <ul>
-	<li># of pages: {{ n_pages }}</li>
+	<li>Total # of pages: {{ n_pages }}</li>
+	<li>Detected images on {{pages|length}} pages</li>
+	<li>Recall: {{recall}}</li>
+	<li>Precision: {{precision}}</li>
 </ul>
-<ul>
-</ul>
+{% for page in pages %}
+<div class='page {{page.result}}'>
+	<a href="/picture_blocks/{{scan_id}}/{{page.number}}.png">
+		<img width='200px' class='page-thumbnail' src="http://www.archive.org/download/{{scan_id}}/page/n{{page.number}}_small"/>
+	</a>
+	<div class='info'>
+		<ul>
+			<li>Page #: {{page.number}}</li>
+			<li>Number of blocks: {{page.n_blocks}}</li>
+			<li>Block coverage: {{page.coverage}}%</li>
+			<li>Processing time: {{page.processing_time_ms}}ms</li>
+		</ul>
+	</div>
+</div>
+{% endfor %}
+
+</body>
+</html>

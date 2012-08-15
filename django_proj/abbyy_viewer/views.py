@@ -142,20 +142,55 @@ def picture_blocks_analysis(request, scan_id):
             break
 
     n = 0
+    pages = []
+    counts = {
+        'tp': 0, 'fp': 0, 'tn': 0, 'fn': 0        
+    }
     for log_row in log_reader:
 
-        if (log_row[1] == 'True'):
-            print 'detected', n
+        page = {
+            'number': log_row[0],
+            'detected': (log_row[1] == 'True'),
+            'result' : None,
+            'processing_time_ms': "{0:0.5f}".format(float(log_row[2]) * 1000),
+            'n_blocks': log_row[3],
+            'coverage': "{0:0.3f}".format(float(log_row[4]))
+        }
 
-        control_reader.next()
+        if (log_row[1] == 'True'):
+
+            if control_row[6] == 'Yes':            
+                page['result'] = 'true-positive'
+                counts['tp'] += 1
+            else:
+                page['result'] = 'false-positive'
+                counts['fp'] += 1
+
+        else:
+
+            if control_row[6] == 'Yes':
+                page['result'] = 'false-negative'
+                counts['fn'] += 1
+            else:
+                page['result'] = 'true-negative'
+                counts['tn'] += 1
+        
         n += 1
+
+        if (page['result'] != 'true-negative'):
+            pages.append(page)
+
+        control_row = control_reader.next()            
 
     log_file.close()
     control_file.close()
 
     return render_to_response('picture_blocks_analysis.html', {
         'scan_id': scan_id,
-        'n_pages': n
+        'n_pages': n,
+        'pages': pages,
+        'precision': "{0:0.3f}".format(float(counts['tp']) / (counts['tp'] + counts['fp'])),
+        'recall': "{0:0.3f}".format(float(counts['tp']) / (counts['tp'] + counts['fn']))
     })
 
 
