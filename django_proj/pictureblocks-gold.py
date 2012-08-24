@@ -11,19 +11,25 @@ if __name__ == "__main__":
 
     args = ap.parse_args()
 
-    input_file = 'BHL-gold-standard.csv'
+    input_filename = 'BHL-gold-standard.csv'
+    output_filename = 'output/pictureblocks/' + input_filename.replace('.csv', '-output.csv')
 
-    control_file = open(input_file, 'rU')
+    control_file = open(input_filename, 'rU')
     control_reader = csv.reader(control_file)
     control_reader.next()  # skip header
+
+    output_file = open(output_filename, 'w')
+    output_writer = csv.writer(output_file)
+
+    t0 = clock()
 
     n_control = 0
     control_data = {}
     for row in control_reader:
 
         # temporary
-        if row[0] != 'mobot31753002719497':
-            continue
+        #if row[0] != 'mobot31753002364039':
+        #    continue
 
         # New scan encountered
         if not row[0] in control_data:
@@ -52,11 +58,8 @@ if __name__ == "__main__":
             ia_page_index = 0
             scandata_index = 0
 
-
         while(skipScanDataPage(scandata_pages[scandata_index])):
             scandata_index += 1
-
-        print 'page', ia_page_index, scandata_index
 
         result = processPage(
             scan_id,
@@ -66,10 +69,18 @@ if __name__ == "__main__":
             False
         )
 
+        output_writer.writerow([
+            row[0],
+            row[3],
+            result['abbyy_processing'],
+            result['n_picture_blocks'],
+            result['coverage'],
+        ])
 
         ia_page_index += 1
         scandata_index += 1
 
+    output_file.close()
+    control_file.close()
 
-
-
+    print 'Finished in', (clock() - t0)
