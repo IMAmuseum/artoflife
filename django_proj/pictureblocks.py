@@ -61,7 +61,8 @@ def processPage(scan_id, ia_page_index, scandata, abbyy, render=False):
         'image_detected': (not len(pblocks) == 0),
         'n_picture_blocks': len(pblocks),
         'abbyy_processing': clock() - t0,
-        'coverage': 0
+        'coverage': 0,
+        'blocks_intersect': False
     }
 
     if len(pblocks) == 0:
@@ -77,10 +78,30 @@ def processPage(scan_id, ia_page_index, scandata, abbyy, render=False):
 
     info['coverage'] = 100 * Ab / Ap
 
+    # determine intersections
+    for b1 in pblocks:
+        for b2 in pblocks:
+            if b2 == b1:
+                break
+            info['blocks_intersect'] = blocksIntersect(b1, b2)
+            if info['blocks_intersect']:
+                break
+        if info['blocks_intersect']:
+            break
+
     if render:
         renderBlocks(scan_id, ia_page_index, pblocks)
 
     return info
+
+
+def blocksIntersect(b1, b2):
+    return not (
+        (b2.attrib['l'] > b1.attrib['r']) or
+        (b2.attrib['r'] > b1.attrib['l']) or
+        (b2.attrib['t'] > b1.attrib['b']) or
+        (b2.attrib['b'] > b1.attrib['t'])
+    )
 
 
 if __name__ == '__main__':
@@ -150,7 +171,8 @@ if __name__ == '__main__':
         'Image detected',
         'Processing time',
         '# of picture blocks',
-        '% coverage'
+        '% coverage',
+        'intersection'
     ])
 
     for p in range(0, len(results)):
@@ -160,7 +182,8 @@ if __name__ == '__main__':
             results[p]['image_detected'],
             results[p]['abbyy_processing'],
             results[p]['n_picture_blocks'],
-            results[p]['coverage']
+            results[p]['coverage'],
+            results[p]['blocks_intersect']
         ])
         if (results[p]['image_detected']):
             print 'Image detected on page', p

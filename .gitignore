@@ -10,3 +10,7 @@ django_proj/tmp/*
 
 django_proj/output/contrast/*.csv
 django_proj/output/pictureblocks/*.csv
+
+django_proj/~$BHLIllustrations.xlsx
+
+django_proj/BHLIllustrations.xlsx

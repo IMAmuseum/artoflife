@@ -109,10 +109,16 @@ def picture_blocks(request, scan_id, index, ext='png'):
     return HttpResponse(open(img_file), content_type='image/' + ext)
 
 
-def picture_blocks_analysis(request, scan_id):
+def picture_blocks_gold_analysis(request, scan_id):
+    return picture_blocks_analysis(request, scan_id, 'BHL-gold-standard.csv')
+
+
+def picture_blocks_analysis(request, scan_id, control_filename='BHLIllustrations.csv'):
     """
     Initial implementation: Render output from a prior run
     """
+
+    print control_filename
 
     import csv
 
@@ -120,10 +126,12 @@ def picture_blocks_analysis(request, scan_id):
     fs = sc()
 
     log_filepath = fs.path('output/pictureblocks/%s-pictureblocks.csv' % (scan_id))
-    control_filepath = fs.path('BHLIllustrations.csv')
+    control_filepath = fs.path(control_filename)
 
     #print 'Log file:', log_filepath
     #print 'Control file:', control_filepath
+
+    print control_filepath
 
     if not fs.exists(log_filepath) or not fs.exists(control_filepath):
         raise Http404
@@ -144,22 +152,26 @@ def picture_blocks_analysis(request, scan_id):
     n = 0
     pages = []
     counts = {
-        'tp': 0, 'fp': 0, 'tn': 0, 'fn': 0        
+        'tp': 0, 'fp': 0, 'tn': 0, 'fn': 0
     }
     for log_row in log_reader:
 
         page = {
             'number': log_row[0],
             'detected': (log_row[1] == 'True'),
-            'result' : None,
+            'result': None,
             'processing_time_ms': "{0:0.5f}".format(float(log_row[2]) * 1000),
             'n_blocks': log_row[3],
-            'coverage': "{0:0.3f}".format(float(log_row[4]))
+            'coverage': "{0:0.3f}".format(float(log_row[4])),
+            'intersections': 'unknown'
         }
+
+        if (len(log_row) > 5):
+            page['intersections'] = 'Yes' if (log_row[5] == 'True') else 'No'
 
         if (log_row[1] == 'True'):
 
-            if control_row[6] == 'Yes':            
+            if control_row[6] == 'Yes':
                 page['result'] = 'true-positive'
                 counts['tp'] += 1
             else:
@@ -174,13 +186,13 @@ def picture_blocks_analysis(request, scan_id):
             else:
                 page['result'] = 'true-negative'
                 counts['tn'] += 1
-        
+
         n += 1
 
         if (page['result'] != 'true-negative'):
             pages.append(page)
 
-        control_row = control_reader.next()            
+        control_row = control_reader.next()
 
     log_file.close()
     control_file.close()

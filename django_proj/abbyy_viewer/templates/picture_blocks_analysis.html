@@ -17,15 +17,18 @@
 }
 
 .page.false-negative img {
-	border: 2px solid red;
+	color: red;
+	border: 5px solid red;
 }
 
 .page.false-positive img {
-	border: 2px solid blue;
+	color: blue;
+	border: 5px solid blue;
 }
 
 .page.true-positive img {
-	border: 2px solid green;
+	color: green;
+	border: 5px solid green;
 }
 
 </style>
@@ -33,12 +36,20 @@
 <body>
 
 <h2>Picture Blocks Analysis for {{scan_id}}</h2>
+
 <ul>
 	<li>Total # of pages: {{ n_pages }}</li>
 	<li>Detected images on {{pages|length}} pages</li>
 	<li>Recall: {{recall}}</li>
 	<li>Precision: {{precision}}</li>
 </ul>
+
+<div class='legend'>
+	<p style='color: green'>True Positive</p>
+	<p style='color: blue'>False Positive</p>
+	<p style='color: red'>False Negative</p>
+</div>
+
 {% for page in pages %}
 <div class='page {{page.result}}'>
 	<a href="/picture_blocks/{{scan_id}}/{{page.number}}.png">
@@ -46,10 +57,11 @@
 	</a>
 	<div class='info'>
 		<ul>
-			<li>Page #: {{page.number}}</li>
+			<li>Internet Archive Page #: {{page.number}}</li>
 			<li>Number of blocks: {{page.n_blocks}}</li>
 			<li>Block coverage: {{page.coverage}}%</li>
 			<li>Processing time: {{page.processing_time_ms}}ms</li>
+			<li>Blocks intersect: {{page.intersections}}</li>
 		</ul>
 	</div>
 </div>
