@@ -96,15 +96,19 @@ def processPage(scan_id, ia_page_index, scandata, abbyy, render=False):
 
 
 def blocksIntersect(b1, b2):
+    return rectsIntersect(b1.attrib, b2.attrib)
+
+
+def rectsIntersect(r1, r2):
     return not (
-        (b2.attrib['l'] > b1.attrib['r']) or
-        (b2.attrib['r'] > b1.attrib['l']) or
-        (b2.attrib['t'] > b1.attrib['b']) or
-        (b2.attrib['b'] > b1.attrib['t'])
+        (r2['l'] > r1['r']) or
+        (r2['r'] > r1['l']) or
+        (r2['t'] > r1['b']) or
+        (r2['b'] > r1['t'])
     )
 
 
-if __name__ == '__main__':
+def runCSV():
 
     import argparse
     import gzip
@@ -192,3 +196,65 @@ if __name__ == '__main__':
 
     if (args.render):
         print 'Avg image processing time:', average(benchmarks['image_processing']), 's'
+
+
+def processScanMongo(collection, scan_id=None):
+
+    for result in collection.find({'scan_id': scan_id}):
+
+        if 'abbyy' not in result:
+            print 'Abbyy data not found for', scan_id, result['scandata_index']
+            continue
+
+        if len(result['abbyy']['picture_blocks']) == 0:
+            continue
+
+        # calculate page area
+        Ap = float(result['abbyy']['width']) * float(result['abbyy']['height'])
+
+        result['abbyy']['coverage'] = 0
+        result['abbyy']['blocks_intersect'] = False
+
+        for block in result['abbyy']['picture_blocks']:
+
+            block['coverage'] = 100 * (int(block['r']) - int(block['l'])) * (int(block['b']) - int(block['t'])) / Ap
+            result['abbyy']['coverage'] += block['coverage']
+
+            # determine intersections
+            if not result['abbyy']['blocks_intersect']:
+                for other_block in result['abbyy']['picture_blocks']:
+                    if other_block == block:
+                        break
+                    result['abbyy']['blocks_intersect'] = rectsIntersect(block, other_block)
+                    if result['abbyy']['blocks_intersect']:
+                        break
+
+        print result
+        collection.save(result)
+
+
+def runMongo():
+
+    import argparse
+    import gzip
+    from helpers import skipScanDataPage
+    from xml.etree import cElementTree as ET
+    import sys
+    import pymongo
+
+    ap = argparse.ArgumentParser(description='picture block processing')
+    ap.add_argument('scan', type=str, help='scan id')
+
+    args = ap.parse_args()
+
+    mongo_conn = pymongo.Connection('localhost', 27017)
+    mongo_db = mongo_conn.artoflife
+    collection = mongo_db.page_data
+
+    processScanMongo(collection, args.scan)
+
+
+if __name__ == '__main__':
+
+#    runCSV()
+    runMongo()
