@@ -124,6 +124,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 
     'abbyy_viewer',
+    'mongo_viewer'
 )
 
 # A sample logging configuration. The only tangible logging

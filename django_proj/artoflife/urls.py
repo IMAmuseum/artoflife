@@ -24,4 +24,9 @@ urlpatterns = patterns('',
     url(r'^picture_blocks/(?P<scan_id>.+)/(?P<index>\d+)\.(?P<ext>.+)$', 'abbyy_viewer.views.picture_blocks'),
     url(r'^scandata/(?P<scan_id>.+)/jp2_(?P<index>\d+)\.jp2$', 'abbyy_viewer.views.jp2_image'),
     url(r'^scandata/(?P<scan_id>.+)/flippy_(?P<index>\d+)\.jpg$', 'abbyy_viewer.views.flippy_image'),
+
+    # Views for browsing the mongo database
+    url(r'^mongo/$', 'mongo_viewer.views.main'),
+    url(r'^mongo/scan/(?P<scan_id>.+)', 'mongo_viewer.views.scan')
+
 )

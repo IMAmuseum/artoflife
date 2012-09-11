@@ -1,0 +1,7 @@
+<h2>Imported scans:</h2>
+
+<ul>
+{% for scan in scans %}
+	<li><a href='/mongo/scan/{{ scan }}'>{{ scan }}</a></li>
+{% endfor %}
+</ul>
