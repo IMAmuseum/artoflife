@@ -236,10 +236,6 @@ def processScanMongo(collection, scan_id=None):
 def runMongo():
 
     import argparse
-    import gzip
-    from helpers import skipScanDataPage
-    from xml.etree import cElementTree as ET
-    import sys
     import pymongo
 
     ap = argparse.ArgumentParser(description='picture block processing')
