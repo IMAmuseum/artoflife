@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, Http404
 from helpers import getMongoCollection
+from analysis import analyzePages, classifyResult
 
 
 def main(request):
@@ -20,17 +21,15 @@ def scan(request, scan_id):
     pages = collection.find({'scan_id': scan_id}).sort('scandata_index', 1)
     print pages.count()
 
-    abbyy_n = 0
-    for page in pages:
-        if len(page['abbyy']['picture_blocks']) > 0:
-            abbyy_n += 1
-
-    pages.rewind()
+    analysis = analyzePages(pages)
 
     return render_to_response('scan.html', {
         'scan_id': scan_id,
-        'pages': pages,
-        'abbyy_n': abbyy_n
+        'pages': analysis['pages'],
+        'n_illustrations': analysis['n_illustrations'],
+        'abbyy_n': analysis['abbyy']['n-true-pos'] + analysis['abbyy']['n-false-neg'],
+        'abbyy_p': analysis['abbyy']['precision'],
+        'abbyy_r': analysis['abbyy']['recall']
     })
 
 

@@ -1,6 +1,58 @@
 import argparse, csv, os
 
 
+def analyzePages(pages):
+
+    info = {
+        'n_illustrations': 0,
+        'pages': []
+    }
+
+    algorithms = ['abbyy']
+
+    for alg in algorithms:
+        info[alg] = {
+            'n-true-pos': 0,
+            'n-false-pos': 0,
+            'n-true-neg': 0,
+            'n-false-neg': 0,
+            'precision': None,
+            'recall': None,
+        }
+
+    for page in pages:
+
+        if page['has_illustration']['gold_standard']:
+            info['n_illustrations'] += 1
+
+        if 'alg_result' not in page:
+            page['alg_result'] = {}
+
+        page['alg_result']['abbyy'] = classifyResult(
+            page['has_illustration']['gold_standard'],
+            (len(page['abbyy']['picture_blocks']) > 0)
+        )
+
+        info['pages'].append(page)
+
+        info[alg]['n-' + page['alg_result']['abbyy']] += 1
+
+    for alg in algorithms:
+        info[alg]['precision'] = float(info[alg]['n-true-pos']) / (info[alg]['n-true-pos'] + info[alg]['n-false-pos'])
+        info[alg]['recall'] = float(info[alg]['n-true-pos']) / (info[alg]['n-true-pos'] + info[alg]['n-false-neg'])
+
+    pages.rewind()
+
+    return info
+
+
+def classifyResult(standard, result):
+    if standard:
+        return 'true-pos' if result else 'false-pos'
+    else:
+        return 'false-pos' if result else 'true-neg'
+
+
 def generateHistogram(values, xlabel):
 
     import matplotlib.pyplot as plt

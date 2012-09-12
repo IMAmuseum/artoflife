@@ -1,14 +1,85 @@
+<html>
+<head>
+
+<style>
+
+.page .info {
+	float: left;
+}
+
+.page .page-thumbnail {
+	height: 200px;
+	float: right;
+}
+
+.page {
+	height: 200px;
+	padding: 10px;
+	clear: both;
+}
+
+.alg-result {
+	padding: 10px;
+	color: #fff;
+	font-size: 50%;
+}
+
+.alg-result div {
+	clear: left;
+	float: left;
+}
+
+.true-pos {
+	background-color: #0a0;
+}
+
+.false-pos {
+	background-color: #00f;
+}
+
+.false-neg {
+	background-color: #f00;
+}
+
+.true-neg {
+	background-color: #000;
+}
+
+
+</style>
+
+</head>
+<body>
+
 <h2>Page data for {{ scan_id }}</h2>
 
+
+<p>Actual # of illustrations: {{ n_illustrations }}</p>
 <p># of pages with picture blocks: {{ abbyy_n }}</p>
+<p>ABBYY precision: {{ abbyy_p }}</p>
+<p>ABBYY recall: {{ abbyy_r }}</p>
+
 
 <div class='pages'>
 {% for page in pages %}
 	<div class='page' style='margin-bottom: 0.5em; background-color: #eee;'>
-		<div class='scandata_index'>Scandata index: {{ page.scandata_index }}</div>		
-		<div class='ia_page_number'>IA page number: {{ page.ia_page_num }}</div>
-        <div class='picture_blocks'># of blocks: {{ page.abbyy.picture_blocks|length }}</div>
-        <div class='total_coverage'>Sum of block coverage: {{ page.abbyy.coverage_sum }}%</div>
+
+		<div class='info'>
+			<div class='scandata_index'>Scandata index: {{ page.scandata_index }}</div>		
+			<div class='ia_page_number'>IA page number: {{ page.ia_page_num }}</div>
+	        <div class='picture_blocks'># of blocks: {{ page.abbyy.picture_blocks|length }}</div>
+	        <div class='total_coverage'>Sum of block coverage: {{ page.abbyy.coverage_sum }}%</div>
+	        <div class='compression'>Compression ratio: {{ page.compression }}</div>
+	       <div class='alg-result'>
+	         <div class='{{ page.alg_result.abbyy }}'>ABBYY</div>
+	       </div>	        
+       </div>
+
+		<img class='page-thumbnail' 
+		     src="http://www.archive.org/download/{{scan_id}}/page/n{{page.ia_page_num}}_small"/>        
 	</div>
 {% endfor %}
 </div>
+
+</body>
+</html>
