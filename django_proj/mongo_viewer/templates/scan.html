@@ -1,7 +1,10 @@
 <h2>Pages for {{ scan_id }}</h2>
 
-<ul>
+
 {% for page in pages %}
-	<li>{{ page.ia_page_num }}</li>
+	<div class='page' style='margin-bottom: 0.5em; background-color: #eee;'>
+		<div class='ia_page_number'>IA page number: {{ page.ia_page_num }}</div>
+        <div class='picture_blocks'># of blocks: {{ page.abbyy.picture_blocks|length }}</div>
+        <div class='total_coverage'>Sum of block coverage: {{ page.abbyy.coverage }}%</div>
+	</div>
 {% endfor %}
-</ul>
