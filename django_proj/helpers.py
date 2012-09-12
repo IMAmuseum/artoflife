@@ -1,4 +1,4 @@
-import os
+import os, pymongo
 from cStringIO import StringIO
 from time import clock
 from urllib import urlopen
@@ -65,3 +65,9 @@ def scanIndexForIAIndex(ia_index, scandata_pages):
         if int(index) == int(ia_index):
             return scan_index
         index += 1
+
+
+def getMongoCollection(name):
+    mongo_conn = pymongo.Connection('localhost', 27017)
+    mongo_db = mongo_conn.artoflife
+    return mongo_db[name]
