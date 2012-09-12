@@ -27,6 +27,7 @@ urlpatterns = patterns('',
 
     # Views for browsing the mongo database
     url(r'^mongo/$', 'mongo_viewer.views.main'),
-    url(r'^mongo/scan/(?P<scan_id>.+)', 'mongo_viewer.views.scan')
+    url(r'^mongo/scan/(?P<scan_id>.+)', 'mongo_viewer.views.scan'),
+    url(r'^mongo/coverage-histogram/', 'mongo_viewer.views.coverageHistogram')
 
 )

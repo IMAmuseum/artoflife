@@ -1,6 +1,25 @@
 import argparse, csv, os
 
 
+def generateHistogram(values, xlabel):
+
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    n, bins, patches = ax.hist(values, 50, facecolor='green', alpha=0.75)
+    #bincenters = 0.5*(bins[1:]+bins[:-1])
+
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('Occurrences')
+    #ax.set_title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
+    #ax.set_xlim(0, 120)
+    ax.grid(True)
+
+    return fig
+
+
 if __name__ == "__main__":
 
     ap = argparse.ArgumentParser(description='analysis')

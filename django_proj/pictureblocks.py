@@ -214,13 +214,13 @@ def processScanMongo(collection, scan_id=None):
         # calculate page area
         Ap = float(result['abbyy']['width']) * float(result['abbyy']['height'])
 
-        result['abbyy']['coverage'] = 0
+        result['abbyy']['coverage_sum'] = 0
         result['abbyy']['blocks_intersect'] = False
 
         for block in result['abbyy']['picture_blocks']:
 
             block['coverage'] = 100 * (int(block['r']) - int(block['l'])) * (int(block['b']) - int(block['t'])) / Ap
-            result['abbyy']['coverage'] += block['coverage']
+            result['abbyy']['coverage_sum'] += block['coverage']
 
             # determine intersections
             if not result['abbyy']['blocks_intersect']:
@@ -234,7 +234,7 @@ def processScanMongo(collection, scan_id=None):
         print result
         collection.save(result)
 
-        return results.count()
+    return results.count()
 
 
 def runMongo():
