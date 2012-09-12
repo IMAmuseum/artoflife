@@ -200,7 +200,9 @@ def runCSV():
 
 def processScanMongo(collection, scan_id=None):
 
-    for result in collection.find({'scan_id': scan_id}):
+    results = collection.find({'scan_id': scan_id})
+
+    for result in results:
 
         if 'abbyy' not in result:
             print 'Abbyy data not found for', scan_id, result['scandata_index']
@@ -232,6 +234,8 @@ def processScanMongo(collection, scan_id=None):
         print result
         collection.save(result)
 
+        return results.count()
+
 
 def runMongo():
 
@@ -239,7 +243,7 @@ def runMongo():
     import pymongo
 
     ap = argparse.ArgumentParser(description='picture block processing')
-    ap.add_argument('scan', type=str, help='scan id')
+    ap.add_argument('--scan', type=str, help='scan id', default=None)
 
     args = ap.parse_args()
 
@@ -247,7 +251,17 @@ def runMongo():
     mongo_db = mongo_conn.artoflife
     collection = mongo_db.page_data
 
-    processScanMongo(collection, args.scan)
+    t = clock()
+
+    if (args.scan):
+        processScanMongo(collection, args.scan)
+    else:
+        n_pages = 0
+        for scan_id in collection.distinct('scan_id'):
+            print 'Processing', scan_id
+            n_pages += processScanMongo(collection, scan_id)
+
+    print 'Completed', n_pages, 'pages in', clock() - t, 's (', n_pages / (clock() - t), ') p/s'
 
 
 if __name__ == '__main__':
