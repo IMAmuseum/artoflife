@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     pages = page_data.find({})
 
-    t_data = range(1, 100)
+    t_data = range(0, 101)
     p_data = []
     r_data = []
 
