@@ -9,7 +9,7 @@ def main(request):
     collection = getMongoCollection('page_data')
 
     return render_to_response('main.html', {
-        'scans': collection.distinct('scan_id')
+        'scans': sorted(collection.distinct('scan_id'))
     })
 
 
