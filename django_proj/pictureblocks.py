@@ -254,7 +254,7 @@ def runMongo():
     t = clock()
 
     if (args.scan):
-        processScanMongo(collection, args.scan)
+        n_pages = processScanMongo(collection, args.scan)
     else:
         n_pages = 0
         for scan_id in collection.distinct('scan_id'):
