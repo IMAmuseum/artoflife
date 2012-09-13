@@ -48,7 +48,7 @@ def analyzePages(pages):
 
 def classifyResult(standard, result):
     if standard:
-        return 'true-pos' if result else 'false-pos'
+        return 'true-pos' if result else 'false-neg'
     else:
         return 'false-pos' if result else 'true-neg'
 
