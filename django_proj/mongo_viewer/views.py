@@ -27,9 +27,11 @@ def scan(request, scan_id):
         'scan_id': scan_id,
         'pages': analysis['pages'],
         'n_illustrations': analysis['n_illustrations'],
-        'abbyy_n': analysis['abbyy']['n-true-pos'] + analysis['abbyy']['n-false-neg'],
+        'abbyy_n': analysis['abbyy']['n-true-pos'] + analysis['abbyy']['n-false-pos'],
         'abbyy_p': analysis['abbyy']['precision'],
-        'abbyy_r': analysis['abbyy']['recall']
+        'abbyy_r': analysis['abbyy']['recall'],
+        'contrast': analysis['contrast'],
+        'contrast_n': analysis['contrast']['n-true-pos'] + analysis['contrast']['n-false-pos']
     })
 
 

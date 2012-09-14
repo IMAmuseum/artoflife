@@ -8,7 +8,7 @@ def analyzePages(pages):
         'pages': []
     }
 
-    algorithms = ['abbyy']
+    algorithms = ['abbyy', 'contrast']
 
     for alg in algorithms:
         info[alg] = {
@@ -33,13 +33,26 @@ def analyzePages(pages):
             (len(page['abbyy']['picture_blocks']) > 0)
         )
 
+        if 'contrast' in page['has_illustration']:
+            page['alg_result']['contrast'] = classifyResult(
+                page['has_illustration']['gold_standard'],
+                page['has_illustration']['contrast']
+            )
+
+        for alg in algorithms:
+            if alg == 'abbyy' or alg in page['has_illustration']:
+                info[alg]['n-' + page['alg_result'][alg]] += 1
+
         info['pages'].append(page)
 
-        info[alg]['n-' + page['alg_result']['abbyy']] += 1
-
     for alg in algorithms:
-        info[alg]['precision'] = float(info[alg]['n-true-pos']) / (info[alg]['n-true-pos'] + info[alg]['n-false-pos'])
-        info[alg]['recall'] = float(info[alg]['n-true-pos']) / (info[alg]['n-true-pos'] + info[alg]['n-false-neg'])
+
+        if info[alg]['n-true-pos'] == 0:
+            info[alg]['precision'] = 0
+            info[alg]['recall'] = 0
+        else:
+            info[alg]['precision'] = float(info[alg]['n-true-pos']) / (info[alg]['n-true-pos'] + info[alg]['n-false-pos'])
+            info[alg]['recall'] = float(info[alg]['n-true-pos']) / (info[alg]['n-true-pos'] + info[alg]['n-false-neg'])
 
     pages.rewind()
 
