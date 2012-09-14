@@ -12,7 +12,8 @@ benchmarks = {
 def convert(working_file, command):
     os.system('convert ' + working_file + ' ' + command + ' ' + working_file)
 
-def processPage(scan_id, ia_page_index, scandata_page):
+
+def processPage(scan_id, ia_page_index):
     print 'processing', scan_id, ia_page_index
 
     img = getIAImage(scan_id, ia_page_index)
@@ -88,21 +89,7 @@ def processPage(scan_id, ia_page_index, scandata_page):
     return info
 
 
-if __name__ == '__main__':
-
-    import argparse
-#    from helpers import combinePageData
-    from numpy import average
-    from xml.etree import cElementTree as ET
-
-    ap = argparse.ArgumentParser(description='picture block processing')
-    ap.add_argument('scan', type=str, help='scan id')
-    ap.add_argument('--page', type=int, help='page #', default=None)
-
-    args = ap.parse_args()
-
-    #scan_id = 'hallofshells00hard'
-    scan_id = args.scan
+def numCSV(scan_id, page=None):
 
     scandata_file = 'scandata/%s/%s_scandata.xml' % (scan_id, scan_id)
 
@@ -143,6 +130,49 @@ if __name__ == '__main__':
             print 'Image detected on page', p
 
     output_file.close()
+
+
+def runMongo(scan_id, page=None):
+
+    from helpers import getMongoCollection
+
+    coll = getMongoCollection('page_data')
+
+    if page is None:
+        pages = coll.find({'scan_id': scan_id})
+    else:
+        pages = coll.find({'scan_id': scan_id, 'scandata_index': page})
+
+    for page in pages:
+        result = processPage(page['scan_id'], page['ia_page_num'])
+
+        page['has_illustration']['contrast'] = result['image_detected']
+        if not 'benchmarks' in page:
+            page['benchmarks'] = {
+                'contrast': {}
+            }
+        page['benchmarks']['contrast']['total'] = benchmarks['image_processing'][-1:][0]
+
+        coll.save(page)
+
+        #print page
+
+
+if __name__ == '__main__':
+
+    import argparse
+#    from helpers import combinePageData
+    from numpy import average
+    from xml.etree import cElementTree as ET
+
+    ap = argparse.ArgumentParser(description='picture block processing')
+    ap.add_argument('scan', type=str, help='scan id')
+    ap.add_argument('--page', type=int, help='page #', default=None)
+
+    args = ap.parse_args()
+
+    runMongo(args.scan, args.page)
+
     print 'Avg image processing time:', average(benchmarks['image_processing']), 's'
     print 'Avg time for single dimension:', average(benchmarks['single_dim']), 's'
 
