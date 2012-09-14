@@ -89,7 +89,7 @@ def processPage(scan_id, ia_page_index):
     return info
 
 
-def numCSV(scan_id, page=None):
+def runCSV(scan_id, page=None):
 
     scandata_file = 'scandata/%s/%s_scandata.xml' % (scan_id, scan_id)
 
