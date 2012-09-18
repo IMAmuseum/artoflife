@@ -27,11 +27,8 @@ def scan(request, scan_id):
         'scan_id': scan_id,
         'pages': analysis['pages'],
         'n_illustrations': analysis['n_illustrations'],
-        'abbyy_n': analysis['abbyy']['n-true-pos'] + analysis['abbyy']['n-false-pos'],
-        'abbyy_p': analysis['abbyy']['precision'],
-        'abbyy_r': analysis['abbyy']['recall'],
+        'abbyy': analysis['abbyy'],
         'contrast': analysis['contrast'],
-        'contrast_n': analysis['contrast']['n-true-pos'] + analysis['contrast']['n-false-pos']
     })
 
 
@@ -57,3 +54,24 @@ def coverageHistogram(request):
 
     # Django's HttpResponse reads the buffer and extracts the image
     return HttpResponse(png_output.getvalue(), mimetype='image/png')
+
+
+def thumbImage(request, scan_id, index):
+
+    import os
+    from urllib2 import urlopen
+
+    cache_file = 'tmp/ia-small/%s/%s.jpeg' % (scan_id, index)
+
+    if not os.path.exists('tmp/ia-small'):
+        os.mkdir('tmp/ia-small')
+    if not os.path.exists('tmp/ia-small/%s' % (scan_id)):
+        os.mkdir('tmp/ia-small/%s' % (scan_id))
+    if not os.path.isfile(cache_file):
+        import shutil
+        url = 'http://www.archive.org/download/%s/page/n%s_small' % (scan_id, index)
+        req = urlopen(url)
+        with open(cache_file, 'wb') as fp:
+            shutil.copyfileobj(req, fp)
+
+    return HttpResponse(open(cache_file), mimetype='image/jpeg')

@@ -54,6 +54,8 @@ def analyzePages(pages):
             info[alg]['precision'] = float(info[alg]['n-true-pos']) / (info[alg]['n-true-pos'] + info[alg]['n-false-pos'])
             info[alg]['recall'] = float(info[alg]['n-true-pos']) / (info[alg]['n-true-pos'] + info[alg]['n-false-neg'])
 
+        info[alg]['n_pos'] = info[alg]['n-true-pos'] + info[alg]['n-false-pos']
+
     pages.rewind()
 
     return info
