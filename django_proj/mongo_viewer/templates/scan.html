@@ -4,7 +4,7 @@
 <style>
 
 .page .info {
-	float: left;
+	font-size: 80%;
 }
 
 .page .page-thumbnail {
@@ -13,15 +13,15 @@
 }
 
 .page {
-	height: 200px;
-	padding: 10px;
-	clear: both;
+	width: 300px;
+	padding: 5px;
+	margin: 5px;
+	float: left;
 }
 
 .alg-result {
 	padding: 10px;
 	color: #fff;
-	font-size: 50%;
 }
 
 .alg-result div {
@@ -45,16 +45,44 @@
 	background-color: #000;
 }
 
+.hidden {
+	display: none;
+}
+
+#filters {
+	background: #eee;
+	position: fixed;
+	top: 0px;
+	right: 0px;
+	padding: 10px;
+}
 
 </style>
+
+<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'></script>
+<script type='text/javascript'>
+	$(document).ready(function() {
+
+		$('#toggle-true-neg').change(function() {
+			$('.true-neg').parents('.page').toggleClass('hidden');
+		});
+
+	});
+</script>
 
 </head>
 <body>
 
 <h2>Page data for {{ scan_id }}</h2>
 
+<div id='filters'>
+  <select id='alg'>
+  	<option value='abbyy'>ABBYY</option> 
+  </select>
+  <input id='toggle-true-neg' type='checkbox' checked='checked' name='show' value='true-neg'/>Show true negatives<br/>
+</div>
+
 <p>Actual # of illustrations: {{ n_illustrations }}</p>
-<p># of pages with picture blocks: {{ abbyy_n }}</p>
 
 <h3>Algorithm results:</h3>
 <ul>
@@ -65,6 +93,9 @@
 <div class='pages'>
 {% for page in pages %}
 	<div class='page' style='margin-bottom: 0.5em; background-color: #eee;'>
+
+		<img class='page-thumbnail' 
+		     src="/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}"/>
 
 		<div class='info'>
 			<div class='scandata_index'>Scandata index: {{ page.scandata_index }}</div>		
@@ -78,8 +109,6 @@
 	        </div>	        
        </div>
 
-		<img class='page-thumbnail' 
-		     src="/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}"/>        
 	</div>
 {% endfor %}
 </div>
