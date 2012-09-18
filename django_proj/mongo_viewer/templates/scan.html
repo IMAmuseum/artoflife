@@ -57,15 +57,23 @@
 	padding: 10px;
 }
 
+.swatch {
+	float: right;
+	width: 10px;
+	height: 10px;
+	margin: 4px;
+}
+
 </style>
 
 <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'></script>
 <script type='text/javascript'>
 	$(document).ready(function() {
 
-		$('#toggle-true-neg').change(function() {
-			$('.true-neg').parents('.page').toggleClass('hidden');
+		$('#filters [name="show"]').change(function() {
+			$('.' + this.value).parents('.page').toggleClass('hidden');
 		});
+
 
 	});
 </script>
@@ -79,7 +87,12 @@
   <select id='alg'>
   	<option value='abbyy'>ABBYY</option> 
   </select>
-  <input id='toggle-true-neg' type='checkbox' checked='checked' name='show' value='true-neg'/>Show true negatives<br/>
+  <br/>
+  <input id='toggle-true-pos' type='checkbox' checked='checked' name='show' value='true-pos'/>Show true positives<div class='true-pos swatch'></div><br/>
+  <input id='toggle-true-neg' type='checkbox' checked='checked' name='show' value='true-neg'/>Show true negatives<div class='true-neg swatch'></div><br/>
+  <input id='toggle-true-neg' type='checkbox' checked='checked' name='show' value='false-pos'/>Show false positives<div class='false-pos swatch'></div><br/>
+  <input id='toggle-true-neg' type='checkbox' checked='checked' name='show' value='false-neg'/>Show false negatives<div class='false-neg swatch'></div><br/>    
+
 </div>
 
 <p>Actual # of illustrations: {{ n_illustrations }}</p>
