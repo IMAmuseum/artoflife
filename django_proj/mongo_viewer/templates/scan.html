@@ -64,18 +64,50 @@
 	margin: 4px;
 }
 
+.golden-value {
+	background: #ccc;
+	padding: 0px 2px;
+	cursor: pointer;
+}
+
+#hidden {
+	display: none;
+}
+
 </style>
 
-<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'></script>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
 <script type='text/javascript'>
+
 	$(document).ready(function() {
 
 		$('#filters [name="show"]').change(function() {
 			$('.' + this.value).parents('.page').toggleClass('hidden');
 		});
 
+		$('.golden-value').live('click', function() {
+
+			$('#illustration_type').val($(this).text());
+			var selected = this;
+
+			$('#illustration-dialog').dialog({
+				modal: true,
+				buttons: { 
+					"Submit": function() { 
+						$(selected).text($('#illustration_type').val());
+						$(this).dialog("close"); 
+					},
+					"Cancel": function() { $(this).dialog("close"); }
+				}
+			});
+
+		});
 
 	});
+
 </script>
 
 </head>
@@ -95,6 +127,16 @@
 
 </div>
 
+<div id='hidden'>
+	<div id='illustration-dialog' title='Change value'>
+		Has illustration:
+		<select id='illustration_type' >
+			<option value='yes'>yes</option>
+			<option value='no'>no</option>
+		</select>
+	</div>
+</div>
+
 <p>Actual # of illustrations: {{ n_illustrations }}</p>
 
 <h3>Algorithm results:</h3>
@@ -105,24 +147,7 @@
 
 <div class='pages'>
 {% for page in pages %}
-	<div class='page' style='margin-bottom: 0.5em; background-color: #eee;'>
-
-		<img class='page-thumbnail' 
-		     src="/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}"/>
-
-		<div class='info'>
-			<div class='scandata_index'>Scandata index: {{ page.scandata_index }}</div>		
-			<div class='ia_page_number'>IA page number: {{ page.ia_page_num }}</div>
-			<div class='golden'>Has illustration: {% if page.has_illustration.gold_standard %}YES{% else %}NO{% endif %}</div>
-	        <div class='picture_blocks'># of blocks: {{ page.abbyy.picture_blocks|length }}</div>
-	        <div class='total_coverage'>Sum of block coverage: {{ page.abbyy.coverage_sum|floatformat:3 }}%</div>
-	        <div class='compression'>Compression ratio: {{ page.compression|floatformat:3 }}</div>
-	        <div class='alg-result'>
-	        	<div class='{{ page.alg_result.abbyy }}'>ABBYY</div>
-	        </div>	        
-       </div>
-
-	</div>
+  {{ page }}
 {% endfor %}
 </div>
 

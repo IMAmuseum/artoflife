@@ -1,0 +1,18 @@
+<div class='page' style='margin-bottom: 0.5em; background-color: #eee;'>
+
+	<img class='page-thumbnail' 
+	     src="/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}"/>
+
+	<div class='info'>
+		<div class='scandata_index'>Scandata index: {{ page.scandata_index }}</div>		
+		<div class='ia_page_number'>IA page number: {{ page.ia_page_num }}</div>
+		<div class='golden'>Has illustration: <span class='golden-value'>{% if page.has_illustration.gold_standard %}yes{% else %}no{% endif %}</span></div>
+        <div class='picture_blocks'># of blocks: {{ page.abbyy.picture_blocks|length }}</div>
+        <div class='total_coverage'>Sum of block coverage: {{ page.abbyy.coverage_sum|floatformat:3 }}%</div>
+        <div class='compression'>Compression ratio: {{ page.compression|floatformat:3 }}</div>
+        <div class='alg-result'>
+        	<div class='{{ page.alg_result.abbyy }}'>ABBYY</div>
+        </div>	        
+   </div>
+
+</div>

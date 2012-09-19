@@ -1,7 +1,8 @@
 from django.shortcuts import render_to_response
+from django.template.loader import render_to_string
 from django.http import HttpResponse, Http404
 from helpers import getMongoCollection
-from analysis import analyzePages, classifyResult
+from analysis import analyzePage, analyzePages, classifyResult
 
 
 def main(request):
@@ -23,12 +24,30 @@ def scan(request, scan_id):
 
     analysis = analyzePages(pages)
 
+    page_content = []
+    for page in analysis['pages']:
+        page_content.append(render_to_string('page.html', {
+            'scan_id': scan_id,
+            'page': page
+        }))
+
     return render_to_response('scan.html', {
         'scan_id': scan_id,
-        'pages': analysis['pages'],
+        'pages': page_content,
         'n_illustrations': analysis['n_illustrations'],
         'abbyy': analysis['abbyy'],
         'contrast': analysis['contrast'],
+    })
+
+
+def page(request, scan_id, page_id):
+
+    collection = getMongoCollection('page_data')
+    page = collection.find_one({'scan_id': scan_id, 'ia_page_num': int(page_id)})
+    analyzePage(page)
+    return render_to_response('page.html', {
+        'scan_id': scan_id,
+        'page': page
     })
 
 

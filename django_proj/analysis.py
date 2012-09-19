@@ -1,6 +1,23 @@
 import argparse, csv, os
 
 
+def analyzePage(page):
+
+    if 'alg_result' not in page:
+        page['alg_result'] = {}
+
+    page['alg_result']['abbyy'] = classifyResult(
+        page['has_illustration']['gold_standard'],
+        (len(page['abbyy']['picture_blocks']) > 0)
+    )
+
+    if 'contrast' in page['has_illustration']:
+        page['alg_result']['contrast'] = classifyResult(
+            page['has_illustration']['gold_standard'],
+            page['has_illustration']['contrast']
+        )
+
+
 def analyzePages(pages):
 
     info = {
@@ -25,19 +42,7 @@ def analyzePages(pages):
         if page['has_illustration']['gold_standard']:
             info['n_illustrations'] += 1
 
-        if 'alg_result' not in page:
-            page['alg_result'] = {}
-
-        page['alg_result']['abbyy'] = classifyResult(
-            page['has_illustration']['gold_standard'],
-            (len(page['abbyy']['picture_blocks']) > 0)
-        )
-
-        if 'contrast' in page['has_illustration']:
-            page['alg_result']['contrast'] = classifyResult(
-                page['has_illustration']['gold_standard'],
-                page['has_illustration']['contrast']
-            )
+        analyzePage(page)
 
         for alg in algorithms:
             if alg == 'abbyy' or alg in page['has_illustration']:
