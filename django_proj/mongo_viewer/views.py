@@ -9,8 +9,16 @@ def main(request):
 
     collection = getMongoCollection('page_data')
 
+    scan_info = []
+    for scan in sorted(collection.distinct('scan_id')):
+        pages = collection.find({'scan_id': scan})
+        scan_info.append({
+            'scan_id': scan,
+            'n_pages': pages.count()
+        })
+
     return render_to_response('main.html', {
-        'scans': sorted(collection.distinct('scan_id'))
+        'scans': scan_info
     })
 
 
@@ -36,7 +44,7 @@ def scan(request, scan_id):
         'pages': page_content,
         'n_illustrations': analysis['n_illustrations'],
         'abbyy': analysis['abbyy'],
-        'contrast': analysis['contrast'],
+        'contrast': analysis['contrast']
     })
 
 

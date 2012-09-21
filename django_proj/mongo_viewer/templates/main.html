@@ -2,6 +2,6 @@
 
 <ul>
 {% for scan in scans %}
-	<li><a href='/mongo/scan/{{ scan }}'>{{ scan }}</a></li>
+	<li><a href='/mongo/scan/{{ scan.scan_id }}'>{{ scan.scan_id }}</a> ({{ scan.n_pages }}p)</li>
 {% endfor %}
 </ul>
