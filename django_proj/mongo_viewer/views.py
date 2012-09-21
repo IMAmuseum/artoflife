@@ -53,18 +53,35 @@ def page(request, scan_id, page_id):
 
 def coverageHistogram(request):
 
-    import StringIO
-    from analysis import generateHistogram
-    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    collection = getMongoCollection('page_data')
+
+    data = []
+    for page in collection.find({}):
+        if ('coverage_sum' in page['abbyy']):
+            data.append(page['abbyy']['coverage_sum'])
+
+    return createHistogram(data, 'Sum of Picture Block Coverage')
+
+
+def compressionHistogram(request):
 
     collection = getMongoCollection('page_data')
 
     data = []
     for page in collection.find({}):
-        if ('coverage_sum' in page['abbyy']) and (page['abbyy']['coverage_sum'] > 0):
-            data.append(page['abbyy']['coverage_sum'])
+        if ('compression' in page):
+            data.append(page['compression'])
 
-    hist = generateHistogram(data, 'Coverage')
+    return createHistogram(data, 'Compression Ratio')
+
+
+def createHistogram(data, label):
+
+    import StringIO
+    from analysis import generateHistogram
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+
+    hist = generateHistogram(data, label)
     canvas = FigureCanvas(hist)
     print 'got canvas'
 
