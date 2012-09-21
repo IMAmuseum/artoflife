@@ -7,9 +7,15 @@ def processPage(scan_id, ia_page_index):
     img = getIAImage(scan_id, ia_page_index)
     filesize = os.path.getsize('tmp/ia/%s/%s.jpeg' % (scan_id, ia_page_index))
 
+    mode_to_bpp = {'1':1, 'L':8, 'P':8, 'RGB':24, 'RGBA':32, 'CMYK':32, 'YCbCr':24, 'I':32, 'F':32}
+
+    area = img.size[0] * img.size[1]
+
     return {
         'file_size': filesize,
-        'compression': float(filesize) / (img.size[0] * img.size[1])
+        'bytes_per_pixel': float(filesize) / area,
+        'pixel_depth': mode_to_bpp[img.mode],
+        'compression': float(filesize) * 8 / (area * mode_to_bpp[img.mode])
     }
 
 
