@@ -59,6 +59,54 @@ def page(request, scan_id, page_id):
     })
 
 
+def pageWithPictureBlocks(request, scan_id, page_id):
+
+    import os
+    from helpers import getIAImage
+    from PIL import ImageDraw
+
+    collection = getMongoCollection('page_data')
+    page = collection.find_one({'scan_id': scan_id, 'ia_page_num': int(page_id)})
+
+    img = getIAImage(scan_id, page_id)
+
+    if not os.path.exists('tmp/pictureblocks'):
+        os.mkdir('tmp/pictureblocks')
+    if not os.path.exists('tmp/pictureblocks/%s' % (scan_id)):
+        os.mkdir('tmp/pictureblocks/%s' % (scan_id))
+
+    output_file = 'tmp/pictureblocks/%s/%s_blocks_%s.png' % (scan_id, scan_id, page_id)
+
+    output_width = 500
+
+    size = img.size
+    scale = float(output_width) / img.size[0]
+    print 'Image size:', size, 'scale factor:', scale
+
+    small = img.resize([output_width, int(img.size[1] * scale)])
+
+    draw = ImageDraw.Draw(small)
+
+    if 'abbyy' in page:
+        if 'picture_blocks' in page['abbyy']:
+            for block in page['abbyy']['picture_blocks']:
+
+                draw.rectangle([
+                        (float(block['l']) * scale, float(block['t']) * scale),
+                        (float(block['r']) * scale, float(block['b']) * scale)
+                    ],
+                    outline=(0, 255, 0)
+                )
+
+    del draw
+
+    small.save(output_file)
+    del img
+    del small
+
+    return HttpResponse(open(output_file), content_type='image/png')
+
+
 def coverageHistogram(request):
 
     collection = getMongoCollection('page_data')

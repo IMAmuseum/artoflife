@@ -1,7 +1,12 @@
 <div class='page' style='margin-bottom: 0.5em; background-color: #eee;'>
 
-	<img class='page-thumbnail' 
-	     src="/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}"/>
+    <div class='page-thumbnail'>
+
+    	<a href='/mongo/picture_blocks/{{scan_id}}/{{page.ia_page_num}}'>
+            <img src="/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}" />
+        </a>
+
+    </div>
 
 	<div class='info'>
 		<div class='scandata_index'>Scandata index: {{ page.scandata_index }}</div>		
