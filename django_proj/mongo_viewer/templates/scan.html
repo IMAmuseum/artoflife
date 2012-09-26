@@ -87,8 +87,22 @@
 
 	$(document).ready(function() {
 
+		$('#alg').change(function() {
+
+			// Display all pages again			
+			$('.page').removeClass('hidden');
+
+			// Hide pages according to the filters
+			$('#filters [type="checkbox"]').each(function() {
+				if (!this.checked) {
+					$('.' + $('#alg').val() + '.' + this.value).parents('.page').addClass('hidden');
+				}
+			});
+
+		});
+
 		$('#filters [name="show"]').change(function() {
-			$('.' + this.value).parents('.page').toggleClass('hidden');
+			$('.' + $('#alg').val() + '.' + this.value).parents('.page').toggleClass('hidden');
 		});
 
 		$('.golden-value').on('click', function() {
@@ -121,6 +135,7 @@
 <div id='filters'>
   <select id='alg'>
   	<option value='abbyy'>ABBYY</option> 
+  	<option value='contrast'>contrast</option>   	
   </select>
   <br/>
   <input id='toggle-true-pos' type='checkbox' checked='checked' name='show' value='true-pos'/>Show true positives<div class='true-pos swatch'></div><br/>
