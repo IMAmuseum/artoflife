@@ -61,6 +61,14 @@ def page(request, scan_id, page_id):
 
 def pageWithPictureBlocks(request, scan_id, page_id):
 
+    print 'foo'
+
+    return render_to_response('page_with_blocks.html', {
+        'scan_id': scan_id,
+        'page_id': page_id
+    })
+
+    '''
     import os
     from helpers import getIAImage
     from PIL import ImageDraw
@@ -105,6 +113,7 @@ def pageWithPictureBlocks(request, scan_id, page_id):
     del small
 
     return HttpResponse(open(output_file), content_type='image/png')
+    '''
 
 
 def pictureBlocksAsSVG(request, scan_id, page_id):
@@ -174,19 +183,29 @@ def createHistogram(data, label):
 
 
 def thumbImage(request, scan_id, index):
+    return renderIAImage(request, scan_id, index, 'small')
+
+
+def renderIAImage(request, scan_id, index, size=None):
 
     import os
     from urllib2 import urlopen
 
-    cache_file = 'tmp/ia-small/%s/%s.jpeg' % (scan_id, index)
+    path = 'tmp/ia'
+    if size is not None and size in ('small'):
+        path = 'tmp/ia-' + size
 
-    if not os.path.exists('tmp/ia-small'):
-        os.mkdir('tmp/ia-small')
-    if not os.path.exists('tmp/ia-small/%s' % (scan_id)):
-        os.mkdir('tmp/ia-small/%s' % (scan_id))
+    cache_file = '%s/%s/%s.jpeg' % (path, scan_id, index)
+
+    if not os.path.exists(path):
+        os.mkdir(path)
+    if not os.path.exists('%s/%s' % (path, scan_id)):
+        os.mkdir('%s/%s' % (path, scan_id))
     if not os.path.isfile(cache_file):
         import shutil
-        url = 'http://www.archive.org/download/%s/page/n%s_small' % (scan_id, index)
+        url = 'http://www.archive.org/download/%s/page/n%s' % (scan_id, index)
+        if size is not None and size in ('small'):
+            url += '_' + size
         req = urlopen(url)
         with open(cache_file, 'wb') as fp:
             shutil.copyfileobj(req, fp)

@@ -3,8 +3,10 @@
     <div class='page-thumbnail'>
 
         {% if page.abbyy.coverage_sum %}
-            <img style='background-image: url(/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}})' 
-                 class='svg-blocks' src='/mongo/picture_blocks/{{ scan_id }}/{{ page.ia_page_num }}.svg' />
+            <a href='/mongo/picture_blocks/{{scan_id}}/{{page.ia_page_num}}'>
+                <img style='background-image: url(/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}})' 
+                     class='svg-blocks' src='/mongo/picture_blocks/{{ scan_id }}/{{ page.ia_page_num }}.svg' />
+            </a>
         {% else %}
             <img class='no-blocks' src='/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}' />
         {% endif %}        

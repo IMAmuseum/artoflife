@@ -33,6 +33,8 @@ urlpatterns = patterns('',
     url(r'^mongo/picture_blocks/(?P<scan_id>.+)/(?P<page_id>\d+)\.svg$', 'mongo_viewer.views.pictureBlocksAsSVG'),
     url(r'^mongo/coverage-histogram/$', 'mongo_viewer.views.coverageHistogram'),
     url(r'^mongo/compression-histogram/$', 'mongo_viewer.views.compressionHistogram'),
-    url(r'^mongo/ia-thumb/(?P<scan_id>.+)/(?P<index>\d+)$', 'mongo_viewer.views.thumbImage')
+    url(r'^mongo/ia-thumb/(?P<scan_id>.+)/(?P<index>\d+)$', 'mongo_viewer.views.thumbImage'),
+    url(r'^mongo/ia-image/(?P<scan_id>.+)/(?P<index>\d+)$', 'mongo_viewer.views.renderIAImage')
+
 
 )
