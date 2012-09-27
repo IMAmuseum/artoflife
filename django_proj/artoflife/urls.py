@@ -27,11 +27,12 @@ urlpatterns = patterns('',
 
     # Views for browsing the mongo database
     url(r'^mongo/$', 'mongo_viewer.views.main'),
-    url(r'^mongo/scan/(?P<scan_id>.+)', 'mongo_viewer.views.scan'),
-    url(r'^mongo/page/(?P<scan_id>.+)/(?P<page_id>\d+)', 'mongo_viewer.views.page'),
-    url(r'^mongo/picture_blocks/(?P<scan_id>.+)/(?P<page_id>\d+)', 'mongo_viewer.views.pageWithPictureBlocks'),
-    url(r'^mongo/coverage-histogram/', 'mongo_viewer.views.coverageHistogram'),
-    url(r'^mongo/compression-histogram/', 'mongo_viewer.views.compressionHistogram'),
-    url(r'^mongo/ia-thumb/(?P<scan_id>.+)/(?P<index>\d+)', 'mongo_viewer.views.thumbImage')
+    url(r'^mongo/scan/(?P<scan_id>.+)$', 'mongo_viewer.views.scan'),
+    url(r'^mongo/page/(?P<scan_id>.+)/(?P<page_id>\d+)$', 'mongo_viewer.views.page'),
+    url(r'^mongo/picture_blocks/(?P<scan_id>.+)/(?P<page_id>\d+)$', 'mongo_viewer.views.pageWithPictureBlocks'),
+    url(r'^mongo/picture_blocks/(?P<scan_id>.+)/(?P<page_id>\d+)\.svg$', 'mongo_viewer.views.pictureBlocksAsSVG'),
+    url(r'^mongo/coverage-histogram/$', 'mongo_viewer.views.coverageHistogram'),
+    url(r'^mongo/compression-histogram/$', 'mongo_viewer.views.compressionHistogram'),
+    url(r'^mongo/ia-thumb/(?P<scan_id>.+)/(?P<index>\d+)$', 'mongo_viewer.views.thumbImage')
 
 )

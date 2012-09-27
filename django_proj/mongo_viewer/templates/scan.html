@@ -11,6 +11,10 @@
 	max-height: 200px;
 	float: right;
 	max-width: 150px;
+
+	position: relative;
+	right: 0px;
+	background-size: cover;
 }
 
 .page {
@@ -53,11 +57,12 @@
 }
 
 #filters {
-	background: #eee;
+	background: #ddd;
 	position: fixed;
 	top: 0px;
 	right: 0px;
 	padding: 10px;
+	z-index: 999;
 }
 
 .swatch {
@@ -85,19 +90,27 @@
 
 <script type='text/javascript'>
 
+	// Hide pages according to the filters
+	function hidePages() {
+		$('#filters [type="checkbox"]').each(function() {
+			if (!this.checked) {
+				$('.' + $('#alg').val() + '.' + this.value).parents('.page').addClass('hidden');
+			}
+		});
+	}
+
 	$(document).ready(function() {
+
+		// Hide pages initially if any filters are set
+		hidePages();
 
 		$('#alg').change(function() {
 
 			// Display all pages again			
 			$('.page').removeClass('hidden');
 
-			// Hide pages according to the filters
-			$('#filters [type="checkbox"]').each(function() {
-				if (!this.checked) {
-					$('.' + $('#alg').val() + '.' + this.value).parents('.page').addClass('hidden');
-				}
-			});
+			// Hide pages for the newly selected algorithm
+			hidePages();
 
 		});
 

@@ -90,10 +90,10 @@ def pageWithPictureBlocks(request, scan_id, page_id):
     if 'abbyy' in page:
         if 'picture_blocks' in page['abbyy']:
             for block in page['abbyy']['picture_blocks']:
-
+                print block
                 draw.rectangle([
-                        (float(block['l']) * scale, float(block['t']) * scale),
-                        (float(block['r']) * scale, float(block['b']) * scale)
+                        (int(block['l'] * scale), int(block['t'] * scale)),
+                        (int(block['r'] * scale), int(block['b'] * scale))
                     ],
                     outline=(0, 255, 0)
                 )
@@ -105,6 +105,31 @@ def pageWithPictureBlocks(request, scan_id, page_id):
     del small
 
     return HttpResponse(open(output_file), content_type='image/png')
+
+
+def pictureBlocksAsSVG(request, scan_id, page_id):
+
+    collection = getMongoCollection('page_data')
+    page = collection.find_one({'scan_id': scan_id, 'ia_page_num': int(page_id)})
+
+    print page
+
+    rects = []
+    if 'abbyy' in page:
+        if 'picture_blocks' in page['abbyy']:
+            for block in page['abbyy']['picture_blocks']:
+                rects.append({
+                    'x': block['l'],
+                    'y': block['t'],
+                    'w': block['r'] - block['l'],
+                    'h': block['b'] - block['t']
+                })
+
+    return HttpResponse(render_to_response('picture_blocks.svg', {
+        'height': page['abbyy']['height'],
+        'width': page['abbyy']['width'],
+        'rects': rects
+    }), content_type='image/svg+xml')
 
 
 def coverageHistogram(request):

@@ -2,9 +2,12 @@
 
     <div class='page-thumbnail'>
 
-    	<a href='/mongo/picture_blocks/{{scan_id}}/{{page.ia_page_num}}'>
-            <img src="/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}" />
-        </a>
+        {% if page.abbyy.coverage_sum %}
+            <img style='background-image: url(/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}})' 
+                 class='svg-blocks' src='/mongo/picture_blocks/{{ scan_id }}/{{ page.ia_page_num }}.svg' />
+        {% else %}
+            <img class='no-blocks' src='/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}' />
+        {% endif %}        
 
     </div>
 
