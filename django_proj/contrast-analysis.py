@@ -21,6 +21,7 @@ if __name__ == '__main__':
         'false-neg': 0,
         'p': None,
         'r': None,
+        'a': None,
     }
 
     for page in pages:
@@ -33,6 +34,9 @@ if __name__ == '__main__':
     else:
         info['p'] = float(info['true-pos']) / (info['true-pos'] + info['false-pos'])
         info['r'] = float(info['true-pos']) / (info['true-pos'] + info['false-neg'])
+
+    if pages.count() > 0:
+        info['a'] = float(info['true-pos'] + info['true-neg']) / pages.count()
 
     p_data.append(info['p'])
     r_data.append(info['r'])
