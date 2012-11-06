@@ -18,3 +18,5 @@ django_proj/BHLIllustrations.xlsx
 django_proj/dump/artoflife/page_data.bson
 
 *.bson
+
+django_proj/color.png

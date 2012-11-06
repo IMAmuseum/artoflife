@@ -71,12 +71,6 @@ def getJP2Image(book_id, ia_page_index):
     return image_zip.open(jp2_file)
 
 
-    #img = Image.open(tmp_file)
-    #os.remove(tmp_file)
-
-    #return img
-
-
 def scanIndexForIAIndex(ia_index, scandata_pages):
     index = 0
     for scan_index in range(0, len(scandata_pages)):
