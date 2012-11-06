@@ -1,4 +1,4 @@
-import os, pymongo, zipfile
+import os, pymongo
 from cStringIO import StringIO
 from time import clock
 from urllib import urlopen
@@ -55,26 +55,6 @@ def getIAImage(book_id, ia_page_index):
     print 'Fetched in', clock() - t0, 's'
 
     return image
-
-
-def getJP2Image(book_id, ia_page_index):
-
-    if not os.path.exists('tmp/jp2'):
-        os.mkdir('tmp/jp2')
-
-    zip_filename = 'scandata/%s/%s_jp2.zip' % (book_id, book_id)
-    print 'Opening', zip_filename
-    image_zip = zipfile.ZipFile(zip_filename)
-    jp2_file = '%s_jp2/%s_%04d.jp2' % (book_id, book_id, ia_page_index)
-    #image_zip.extract(jp2_file, 'tmp/jp2')
-
-    return image_zip.open(jp2_file)
-
-
-    #img = Image.open(tmp_file)
-    #os.remove(tmp_file)
-
-    #return img
 
 
 def scanIndexForIAIndex(ia_index, scandata_pages):
