@@ -35,6 +35,7 @@ def analyzePages(pages):
             'n-false-neg': 0,
             'precision': None,
             'recall': None,
+            'accuracy': None
         }
 
     for page in pages:
@@ -58,6 +59,9 @@ def analyzePages(pages):
         else:
             info[alg]['precision'] = float(info[alg]['n-true-pos']) / (info[alg]['n-true-pos'] + info[alg]['n-false-pos'])
             info[alg]['recall'] = float(info[alg]['n-true-pos']) / (info[alg]['n-true-pos'] + info[alg]['n-false-neg'])
+
+        if pages.count() > 0:
+            info[alg]['accuracy'] = float(info[alg]['n-true-pos'] + info[alg]['n-true-neg']) / pages.count()
 
         info[alg]['n_pos'] = info[alg]['n-true-pos'] + info[alg]['n-false-pos']
 
