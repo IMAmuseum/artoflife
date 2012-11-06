@@ -1,3 +1,17 @@
+<html>
+
+<head>
+<style>
+
+footer {
+	color: #aaa;
+	font-size: .8em;
+}
+
+</style>
+</head>
+<body>
+
 <h2>Imported scans:</h2>
 
 <ul>
@@ -5,3 +19,11 @@
 	<li><a href='/mongo/scan/{{ scan.scan_id }}'>{{ scan.scan_id }}</a> ({{ scan.n_pages }}p)</li>
 {% endfor %}
 </ul>
+
+<footer>
+	<p>Page built in: {{ build_time }}s, {{ total_pages }} pages</p>
+	<p>Full set estimate: {{ full_build_est|floatformat:3 }}s</p>
+</footer>
+
+</body>
+</html>

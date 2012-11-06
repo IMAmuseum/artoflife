@@ -173,8 +173,8 @@
 
 <h3>Algorithm results:</h3>
 <ul>
-	<li>ABBYY: {{ abbyy.n_pos }} positives, P = {{ abbyy.precision }}, R = {{ abbyy.recall }}</li>
-    <li>Contrast: {{ contrast.n_pos }} positives, P = {{ contrast.precision }}, R = {{ contrast.recall }}</li>
+	<li>ABBYY: {{ abbyy.n_pos }} positives, A = {{ abbyy.accuracy|floatformat:3 }}, P = {{ abbyy.precision|floatformat:3 }}, R = {{ abbyy.recall|floatformat:3 }}</li>
+    <li>Contrast: {{ contrast.n_pos }} positives, A = {{ contrast.accuracy|floatformat:3 }}, P = {{ contrast.precision|floatformat:3 }}, R = {{ contrast.recall|floatformat:3 }}</li>
 </ul>
 
 <div class='pages'>
