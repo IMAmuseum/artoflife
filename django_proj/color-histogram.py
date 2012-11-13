@@ -5,7 +5,7 @@ from PIL import Image as pImage
 from cStringIO import StringIO
 
 import colorsys
-from numpy import histogram
+from numpy import histogram, mean, std
 
 def getJP2asPIL(book_id, ia_page_index, scale=0.5):
 
@@ -48,39 +48,54 @@ def processPage(book_id, page_id):
 
     t1 = clock()
     data = image.getdata()
-    result = {'h': [], 's': []}
+    hues = []
+    sats = []
     for d in data:
         hsv = colorsys.rgb_to_hsv(d[0] / 255.0, d[1] / 255.0, d[2] / 255.0)
-        result['h'].append(hsv[0])
-        result['s'].append(hsv[1])
-
-    result['h'], bin_edges = histogram(result['h'], 100, (0, 1), density=True)
-    result['s'], bin_edges = histogram(result['s'], 100, (0, 1), density=True)
-    result['load_t'] = t1 - t0
-    result['eval_t'] = clock() - t1
+        hues.append(hsv[0])
+        sats.append(hsv[1])
 
     del image
+
+    result = {
+        'h': {
+            'mean': mean(hues),
+            'std': std(hues),
+            'hist': []
+        },
+        's': {
+            'mean': mean(sats),
+            'std': std(sats),
+            'hist': []
+        }
+    }
+
+    result['h']['hist'], bin_edges = histogram(hues, 100, (0, 1), density=True)
+    result['s']['hist'], bin_edges = histogram(sats, 100, (0, 1), density=True)
+    result['load_t'] = t1 - t0
+    result['eval_t'] = clock() - t1
 
     return result
 
 
 def processBook(page_coll, color_coll, book_id):
 
+    color_coll.remove({'scan_id': book_id})
+
     pages = page_coll.find({'scan_id': args.scan}, timeout=False).sort('ia_page_num')
 
     print 'Processing all pages'
     for page in pages:
-        print page['ia_page_num']
-        result = processPage(args.scan, page['ia_page_num'])
 
-        color_coll.save({
-            'scan_id': args.scan,
-            'ia_page_num': page['ia_page_num'],
-            'h': list(result['h']),
-            's': list(result['s']),
-            'load_t': result['load_t'],
-            'eval_t': result['eval_t']
-        })
+        print page['ia_page_num'], 'of', pages.count()
+        info = processPage(args.scan, page['ia_page_num'])
+
+        info['scan_id'] = args.scan
+        info['ia_page_num'] = page['ia_page_num']
+        info['h']['hist'] = list(info['h']['hist'])
+        info['s']['hist'] = list(info['s']['hist'])
+
+        color_coll.save(info)
 
 
 if __name__ == '__main__':
