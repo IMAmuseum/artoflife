@@ -1,6 +1,8 @@
 # python cache files
 *.py[co]
 
+cluster/tmp/*
+
 # scan data used for testing
 django_proj/scandata/*
 
