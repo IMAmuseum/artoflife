@@ -1,5 +1,10 @@
 import os
+import tempfile
 
+import matplotlib as mpl
+mpl.use('Agg')
+
+os.environ['MPLCONFIGDIR'] = tempfile.mkdtemp()
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "artoflife.settings")
 
 # This application object is used by the development server
