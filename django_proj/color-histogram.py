@@ -45,6 +45,9 @@ def processPage(book_id, page_id):
 
     t0 = clock()
     image = getJP2asPIL(book_id, page_id)
+    if image.mode == 'L':
+        print 'b&w'
+        return None
 
     t1 = clock()
     data = image.getdata()
@@ -90,12 +93,14 @@ def processBook(page_coll, color_coll, book_id):
         print page['ia_page_num'], 'of', pages.count()
         info = processPage(args.scan, page['ia_page_num'])
 
-        info['scan_id'] = args.scan
-        info['ia_page_num'] = page['ia_page_num']
-        info['h']['hist'] = list(info['h']['hist'])
-        info['s']['hist'] = list(info['s']['hist'])
+        if info is not None:
 
-        color_coll.save(info)
+            info['scan_id'] = args.scan
+            info['ia_page_num'] = page['ia_page_num']
+            info['h']['hist'] = list(info['h']['hist'])
+            info['s']['hist'] = list(info['s']['hist'])
+
+            color_coll.save(info)
 
 
 if __name__ == '__main__':
