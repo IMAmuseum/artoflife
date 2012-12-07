@@ -18,7 +18,11 @@ def processPage(scan_id, ia_page_index):
 
     img = getIAImage(scan_id, ia_page_index)
 
-    return processImage(img, scan_id, ia_page_index)
+    result = processImage(img, scan_id, ia_page_index)
+
+    del img
+
+    return result
 
 
 def processImage(img, scan_id, ia_page_index, pct_thresh=10):
