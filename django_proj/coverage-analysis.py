@@ -28,11 +28,14 @@ if __name__ == '__main__':
             'a': None
         }
 
+        value = 'coverage_sum'
+        #value = 'coverage_max'
+
         for page in pages:
 
             passes = False
-            if ('coverage_sum' in page['abbyy']) and (page['abbyy']['coverage_sum'] is not None):
-                passes = page['abbyy']['coverage_sum'] >= thresh
+            if (value in page['abbyy']) and (page['abbyy'][value] is not None):
+                passes = page['abbyy'][value] >= thresh
 
             result = classifyResult(page['has_illustration']['gold_standard'], passes)
 

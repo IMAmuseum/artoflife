@@ -7,7 +7,8 @@ def processABBYY(abbyy_page):
         'height': int(abbyy_page.attrib['height']),
         'picture_blocks': [],
         'total_coverage_sum': 0,
-        'coverage_sum': 0
+        'coverage_sum': 0,
+        'coverage_max': 0
     }
 
     blocks = abbyy_page.findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block")
@@ -25,5 +26,6 @@ def processABBYY(abbyy_page):
                 'b': int(block.attrib['b'])
             })
             result['coverage_sum'] += area
+            result['coverage_max'] = max(result['coverage_max'], area)
 
     return result

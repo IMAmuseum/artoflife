@@ -215,11 +215,13 @@ def processScanMongo(collection, scan_id=None):
         Ap = float(result['abbyy']['width']) * float(result['abbyy']['height'])
 
         result['abbyy']['coverage_sum'] = 0
+        result['abbyy']['coverage_max'] = 0
         result['abbyy']['blocks_intersect'] = False
 
         for block in result['abbyy']['picture_blocks']:
 
             block['coverage'] = 100 * (int(block['r']) - int(block['l'])) * (int(block['b']) - int(block['t'])) / Ap
+            result['abbyy']['coverage_max'] = max(block['coverage'], result['abbyy']['coverage_max'])
             result['abbyy']['coverage_sum'] += block['coverage']
 
             # determine intersections
