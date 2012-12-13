@@ -127,8 +127,21 @@
 				modal: true,
 				buttons: { 
 					"Submit": function() { 
-						$(selected).text($('#illustration_type').val());
-						$(this).dialog("close"); 
+						//$(selected).text($('#illustration_type').val());
+						$.ajax({
+							//'type': 'POST',
+							'url': '/mongo/set-has-illustration',
+							'data': {
+								'scan_id': $('#scan_id').val(),
+								'index': $(selected).closest('.page').attr('data-number'),
+								'value': ($('#illustration_type').val() == 'yes')
+							},
+							'dataType': 'json',
+							'success': function(data) {
+								if (data.result == 'success') window.location.reload();
+							} 
+						});
+						$(this).dialog("close"); 						
 					},
 					"Cancel": function() { $(this).dialog("close"); }
 				}
@@ -144,6 +157,8 @@
 <body>
 
 <h2>Page data for {{ scan_id }}</h2>
+
+<input id='scan_id' type='hidden' value='{{ scan_id }}'/>
 
 <div id='filters'>
   <select id='alg'>
