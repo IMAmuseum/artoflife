@@ -73,6 +73,25 @@ def tryScipyCluster(data):
     return smallest
 
 
+def tryDistFromCentroid(data):
+
+    import numpy
+
+    mean = numpy.mean(data, 0)
+    distances = []
+    for d in data:
+        distances.append(numpy.linalg.norm(d - mean))
+    std = numpy.std(distances)
+    print std
+
+    cluster = []
+    for i in range(0, len(distances)):
+        if distances[i] > std * 2.5:
+            cluster.append(i)
+
+    return cluster
+
+
 def analyzeScan(page_coll, color_coll, scan_id):
 
     pages = color_coll.find({'scan_id': scan_id}).sort('ia_page_num')
@@ -82,15 +101,18 @@ def analyzeScan(page_coll, color_coll, scan_id):
 
     data = []
 
+    from numpy import concatenate
+
     # Create the observation matrix
     for page in pages:
-        data.append(array(page['h']['hist']))
+        data.append(array(page['s']['hist']))
 
     #tryPrincipal(array(data))
-    cluster = tryScipyCluster(array(data))
-    #tryDistFromCentroid(array(data))
+    #cluster = tryScipyCluster(array(data))
+    cluster = tryDistFromCentroid(array(data))
 
     print cluster
+    print len(cluster)
 
     count = 0
     pages.rewind()
