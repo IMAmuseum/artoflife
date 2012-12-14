@@ -86,7 +86,7 @@ def tryDistFromCentroid(data):
 
     cluster = []
     for i in range(0, len(distances)):
-        if distances[i] > std * 2.5:
+        if distances[i] > std * 2:
             cluster.append(i)
 
     return cluster
@@ -111,20 +111,26 @@ def analyzeScan(page_coll, color_coll, scan_id):
     #cluster = tryScipyCluster(array(data))
     cluster = tryDistFromCentroid(array(data))
 
-    print cluster
-    print len(cluster)
+    print 'cluster:', cluster
+    print 'length:', len(cluster)
 
-    count = 0
+    correct = 0
+    n = 0
+    found = 0
     pages.rewind()
-    for c in cluster:
-        #print pages[c]['ia_page_num']
-        page_data = page_coll.find_one({'scan_id': pages[c]['scan_id'], 'ia_page_num': pages[c]['ia_page_num']})
+    for i in range(0, pages.count()):
+        page_data = page_coll.find_one({'scan_id': pages[i]['scan_id'], 'ia_page_num': pages[i]['ia_page_num']})
         if page_data['has_illustration']['gold_standard']:
-            count += 1
+            n += 1
+            if (i in cluster):
+                found += 1
+                correct += 1
+        else:
+            if (i not in cluster):
+                correct += 1
 
-    print float(count) / len(data), ' accuracy'
-
-
+    print float(correct) / len(data), 'accuracy'
+    print 'found', found, 'of', n
 
 if __name__ == '__main__':
 
