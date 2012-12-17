@@ -17,8 +17,9 @@ def princomp(A):
 
 def tryPrincipal(data):
     coeff, score, latent = princomp(array(data))
-    print data[0]
-    print coeff[1]
+    #print data[0]
+    #print coeff[1]
+    print score
 
 
 def tryHCluster(data):
@@ -82,7 +83,7 @@ def tryDistFromCentroid(data):
     for d in data:
         distances.append(numpy.linalg.norm(d - mean))
     std = numpy.std(distances)
-    print std
+    #print std
 
     cluster = []
     for i in range(0, len(distances)):
@@ -96,23 +97,27 @@ def analyzeScan(page_coll, color_coll, scan_id):
 
     pages = color_coll.find({'scan_id': scan_id}).sort('ia_page_num')
 
-    with_v = []
-    without_v = []
+    if pages.count() is 0:
+        print scan_id, 'is b&w'
+        return
+
+    if pages.count() != page_coll.find({'scan_id': scan_id}).count():
+        print scan_id, 'is partially b&w'
+        return
 
     data = []
-
-    from numpy import concatenate
 
     # Create the observation matrix
     for page in pages:
         data.append(array(page['s']['hist']))
 
-    #tryPrincipal(array(data))
+    tryPrincipal(array(data))
+    return
     #cluster = tryScipyCluster(array(data))
     cluster = tryDistFromCentroid(array(data))
 
-    print 'cluster:', cluster
-    print 'length:', len(cluster)
+    #print 'cluster:', cluster
+    #print 'length:', len(cluster)
 
     correct = 0
     n = 0
@@ -129,15 +134,16 @@ def analyzeScan(page_coll, color_coll, scan_id):
             if (i not in cluster):
                 correct += 1
 
+    print scan_id, ': ', len(data), 'pages'
     print float(correct) / len(data), 'accuracy'
-    print 'found', found, 'of', n
+    print 'found', found, 'of', n, '( R =', float(found)/n, ')'
 
 if __name__ == '__main__':
 
     import argparse
 
     ap = argparse.ArgumentParser(description='color analysis')
-    ap.add_argument('scan', type=str, help='scan id', default=None)
+    ap.add_argument('--scan', type=str, help='scan id', default=None)
 
     args = ap.parse_args()
 
@@ -147,4 +153,11 @@ if __name__ == '__main__':
     page_coll = mongo_db.page_data
     color_coll = mongo_db.color_data
 
-    analyzeScan(page_coll, color_coll, args.scan)
+    if args.scan == None:
+
+        print 'all'
+        for scan in sorted(page_coll.distinct('scan_id')):
+            analyzeScan(page_coll, color_coll, scan)
+
+    else:        
+        analyzeScan(page_coll, color_coll, args.scan)
