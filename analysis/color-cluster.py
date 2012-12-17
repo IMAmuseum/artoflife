@@ -78,19 +78,20 @@ def tryDistFromCentroid(data):
 
     import numpy
 
-    mean = numpy.mean(data, 0)
+    v_mean = numpy.mean(data, 0)
     distances = []
     for d in data:
-        distances.append(numpy.linalg.norm(d - mean))
+        distances.append(numpy.linalg.norm(d - v_mean))
+    d_mean = numpy.mean(distances)
     std = numpy.std(distances)
     #print std
 
-    cluster = []
+    outliers = []
     for i in range(0, len(distances)):
-        if distances[i] > std * 2:
-            cluster.append(i)
+        if abs(distances[i] - d_mean) > 0.25 * std:
+            outliers.append(i)
 
-    return cluster
+    return outliers
 
 
 def analyzeScan(page_coll, color_coll, scan_id):
@@ -111,8 +112,7 @@ def analyzeScan(page_coll, color_coll, scan_id):
     for page in pages:
         data.append(array(page['s']['hist']))
 
-    tryPrincipal(array(data))
-    return
+    #tryPrincipal(array(data))
     #cluster = tryScipyCluster(array(data))
     cluster = tryDistFromCentroid(array(data))
 
@@ -137,6 +137,12 @@ def analyzeScan(page_coll, color_coll, scan_id):
     print scan_id, ': ', len(data), 'pages'
     print float(correct) / len(data), 'accuracy'
     print 'found', found, 'of', n, '( R =', float(found)/n, ')'
+    return {
+        'n': n,
+        'correct': correct,
+        'found': found,
+        'count': pages.count()
+    }
 
 if __name__ == '__main__':
 
@@ -156,8 +162,19 @@ if __name__ == '__main__':
     if args.scan == None:
 
         print 'all'
+        info = { 'n': 0, 'correct': 0, 'found': 0, 'count': 0 }
         for scan in sorted(page_coll.distinct('scan_id')):
-            analyzeScan(page_coll, color_coll, scan)
+            result = analyzeScan(page_coll, color_coll, scan)
+            if result is not None:
+                info['n'] += result['n']
+                info['correct'] += result['correct']
+                info['found'] += result['found']
+                info['count'] += result['count']
+
+        print 'Summary:'
+        print info['count'], 'pages'
+        print float(info['correct']) / info['count'], ' accuracy'
+        print 'found', info['found'], 'of', info['n'], '( R =', float(info['found'])/info['n'], ')'
 
     else:        
         analyzeScan(page_coll, color_coll, args.scan)
