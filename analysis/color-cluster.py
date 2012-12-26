@@ -110,7 +110,7 @@ def analyzeScan(page_coll, color_coll, scan_id):
 
     # Create the observation matrix
     for page in pages:
-        data.append(array(page['s']['hist']))
+        data.append(array(page['h']['hist']))
 
     #tryPrincipal(array(data))
     #cluster = tryScipyCluster(array(data))
@@ -119,12 +119,17 @@ def analyzeScan(page_coll, color_coll, scan_id):
     #print 'cluster:', cluster
     #print 'length:', len(cluster)
 
+    result = page_coll.update({'scan_id': scan_id}, {"$set": {'color_result': False}}, upsert=True, multi=True)
+
     correct = 0
     n = 0
     found = 0
     pages.rewind()
     for i in range(0, pages.count()):
         page_data = page_coll.find_one({'scan_id': pages[i]['scan_id'], 'ia_page_num': pages[i]['ia_page_num']})
+        if (i in cluster):
+            page_data['color_result'] = True
+            page_coll.save(page_data)
         if page_data['has_illustration']['gold_standard']:
             n += 1
             if (i in cluster):
@@ -136,7 +141,7 @@ def analyzeScan(page_coll, color_coll, scan_id):
 
     print scan_id, ': ', len(data), 'pages'
     print float(correct) / len(data), 'accuracy'
-    print 'found', found, 'of', n, '( R =', float(found)/n, ')'
+    print 'found', found, 'of', n, '( R =', float(found) / n, ')'
     return {
         'n': n,
         'correct': correct,

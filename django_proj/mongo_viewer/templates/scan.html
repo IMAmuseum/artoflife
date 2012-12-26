@@ -52,6 +52,10 @@
 	background-color: #000;
 }
 
+.null {
+	display: none;
+}
+
 .hidden {
 	display: none;
 }
@@ -164,6 +168,7 @@
   <select id='alg'>
   	<option value='abbyy'>ABBYY</option> 
   	<option value='contrast'>contrast</option>   	
+ 	<option value='color'>color</option>   	
   </select>
   <br/>
   <input id='toggle-true-pos' type='checkbox' checked='checked' name='show' value='true-pos'/>Show true positives<div class='true-pos swatch'></div><br/>
@@ -190,6 +195,8 @@
 <ul>
 	<li>ABBYY: {{ abbyy.n_pos }} positives, A = {{ abbyy.accuracy|floatformat:3 }}, P = {{ abbyy.precision|floatformat:3 }}, R = {{ abbyy.recall|floatformat:3 }}</li>
     <li>Contrast: {{ contrast.n_pos }} positives, A = {{ contrast.accuracy|floatformat:3 }}, P = {{ contrast.precision|floatformat:3 }}, R = {{ contrast.recall|floatformat:3 }}</li>
+    <li>Color: {{ color.n_pos }} positives, A = {{ color.accuracy|floatformat:3 }}, P = {{ color.precision|floatformat:3 }}, R = {{ color.recall|floatformat:3 }}</li>
+
 </ul>
 
 <div class='pages'>

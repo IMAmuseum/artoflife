@@ -17,6 +17,14 @@ def analyzePage(page):
             page['has_illustration']['contrast']
         )
 
+    if 'color_result' in page:
+        page['alg_result']['color'] = classifyResult(
+            page['has_illustration']['gold_standard'],
+            page['color_result']
+        )
+    else:
+        page['alg_result']['color'] = 'null'
+
 
 def analyzePages(pages):
 
@@ -25,7 +33,7 @@ def analyzePages(pages):
         'pages': []
     }
 
-    algorithms = ['abbyy', 'contrast']
+    algorithms = ['abbyy', 'contrast', 'color']
 
     for alg in algorithms:
         info[alg] = {
@@ -33,6 +41,7 @@ def analyzePages(pages):
             'n-false-pos': 0,
             'n-true-neg': 0,
             'n-false-neg': 0,
+            'n-null': 0,
             'precision': None,
             'recall': None,
             'accuracy': None
@@ -46,8 +55,8 @@ def analyzePages(pages):
         analyzePage(page)
 
         for alg in algorithms:
-            if alg == 'abbyy' or alg in page['has_illustration']:
-                info[alg]['n-' + page['alg_result'][alg]] += 1
+            #if alg == 'abbyy' or alg == 'color' or alg in page['has_illustration']:
+            info[alg]['n-' + page['alg_result'][alg]] += 1
 
         info['pages'].append(page)
 

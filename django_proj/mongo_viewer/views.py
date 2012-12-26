@@ -55,7 +55,8 @@ def scan(request, scan_id):
         'pages': page_content,
         'n_illustrations': analysis['n_illustrations'],
         'abbyy': analysis['abbyy'],
-        'contrast': analysis['contrast']
+        'contrast': analysis['contrast'],
+        'color': analysis['color']
     })
 
 
