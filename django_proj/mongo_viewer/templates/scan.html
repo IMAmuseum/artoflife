@@ -99,8 +99,24 @@
 		$('#filters [type="checkbox"]').each(function() {
 			if (!this.checked) {
 				$('.' + $('#alg').val() + '.' + this.value).parents('.page').addClass('hidden');
-			}
+			} 
 		});
+
+		var v = parseFloat($('#coverage-thresh').val());
+
+		if (!isNaN(v)) {
+
+			console.log(v);
+
+			$('.page').not('.hidden').each(function() {
+				page_v = parseFloat($('.total_coverage .value', this).text());
+				if (isNaN(page_v) || (page_v < v)) {
+					$(this).addClass('hidden');
+				}
+			});
+
+		}
+
 	}
 
 	$(document).ready(function() {
@@ -119,7 +135,13 @@
 		});
 
 		$('#filters [name="show"]').change(function() {
-			$('.' + $('#alg').val() + '.' + this.value).parents('.page').toggleClass('hidden');
+
+			// Display all pages again			
+			$('.page').removeClass('hidden');
+
+			// Update page visibility
+			hidePages();			
+			
 		});
 
 		$('.golden-value').on('click', function() {
@@ -153,6 +175,16 @@
 
 		});
 
+		$('#set-coverage-thresh').click(function() {
+
+			// Display all pages again			
+			$('.page').removeClass('hidden');
+
+			// Hide pages that should be hidden
+			hidePages();
+
+		});
+
 	});
 
 </script>
@@ -175,6 +207,10 @@
   <input id='toggle-true-neg' type='checkbox' checked='checked' name='show' value='true-neg'/>Show true negatives<div class='true-neg swatch'></div><br/>
   <input id='toggle-true-neg' type='checkbox' checked='checked' name='show' value='false-pos'/>Show false positives<div class='false-pos swatch'></div><br/>
   <input id='toggle-true-neg' type='checkbox' checked='checked' name='show' value='false-neg'/>Show false negatives<div class='false-neg swatch'></div><br/>    
+  <br/>
+  <label for='coverage-thresh'>Coverage Threshold</label>
+  <input id='coverage-thresh' name='Coverage Threshold'></input>
+  <input id='set-coverage-thresh' type='button' value='Set'></input>
 
 </div>
 
