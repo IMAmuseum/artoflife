@@ -35,11 +35,30 @@ for page in scandata_pages:
         scandata_index += 1
         continue
 
+    has_illustration = None
+
+    pageType = page.find('pageType')
+    altPageTypes = page.find('altPageTypes')
+
+    # Check if this page has been paginated as a cover page
+    if (pageType.text == 'Cover') or (
+        (altPageTypes != None) and (altPageTypes.find('altPageType').text == 'Cover')):
+        has_illustration = False
+
+    # Check if this page has been paginated as an index page
+    if (pageType.text == 'Index') or (
+        (altPageTypes != None) and (altPageTypes.find('altPageType').text == 'Index')):
+        has_illustration = False
+
+    # Add the basic page information
     page_data.append({
         'scan_id': args.scan,
         'leafNum': page.attrib['leafNum'],
         'ia_page_num': ia_page_num,
-        'scandata_index': scandata_index
+        'scandata_index': scandata_index,
+        'has_illustration': {
+            'alg_result': has_illustration
+        }
     })
 
     ia_page_num += 1
