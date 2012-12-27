@@ -31,8 +31,8 @@ var pcoords_data = {{ data }};
 
 // The units and dimensions to visualize, in order.
 var units = {
-  cov: {name: "coverage sum", unit: "%"},
-  cont: {name: "max contig.", unit: "%"},
+  cov: {name: "coverage", unit: "%"},
+  cont: {name: "contrast", unit: "%"},
   comp: {name: "compression", unit: "%"}
 }
 
@@ -41,7 +41,7 @@ var dims = pv.keys(units);
 /* Sizing and scales. */
 var w = 820,
     h = 420,
-    fudge = 0.5,
+    fudge = 0,
     x = pv.Scale.ordinal(dims).splitFlush(0, w),
     y = pv.dict(dims, function(t) pv.Scale.linear(
         pcoords_data.filter(function(d) !isNaN(d[t])),
@@ -104,7 +104,7 @@ var line = change.add(pv.Panel)
     .left(function(t, d) x(t))
     .bottom(function(t, d) y[t](d[t]))
 //    .strokeStyle(function(t, d) c[active](d[active]))
-    .strokeStyle(function(t,d) d['gold'] ? '#8F8' : '#F88')
+    .strokeStyle(function(t,d) d['gold'] ? 'rgba(50, 100, 50, {{alpha}})' : 'rgba(200, 75, 75, {{alpha}})')
     .lineWidth(1);
 
 // Updater for slider and resizer.
@@ -146,7 +146,7 @@ var handle = change.add(pv.Panel)
     .width(10)
     .height(function(d) d.dy)
     .fillStyle(function(t) t.dim == active
-        ? c[t.dim]((filter[t.dim].max + filter[t.dim].min) / 2)
+        ? "hsla(0,0,0%,.8)"
         : "hsla(0,0,50%,.5)")
     .strokeStyle("white")
     .cursor("move")
@@ -167,9 +167,12 @@ vis.render();
     </script>
   </div></div>
 
-<p>Coverage sum - The sum of picture block coverage as a percentage of the page.</p>
-<p>Max contig. - The percentage of the height given by the largest segment in the contrast algorithm.</p>
+<p>Green lines indicate pages with illustrations, red lines indicate those without.</p>
+<p>Coverage - The sum of picture block coverage as a percentage of the page.</p>
+<p>Contrast - The percentage of the height given by the largest segment in the contrast algorithm.</p>
 <p>Compression - The compression ratio</p>
+
+<p>Click and drag near a bar when you see the crosshairs to adjust the filter on that axis. Move the bar up and down after adjusting the size by clicking on it and dragging.</p>
 
 </body>
 </html>

@@ -180,6 +180,9 @@ def parallelCoordinates(request):
 
     result = []
 
+    alpha = request.GET.get('alpha')
+    alpha = 0.8 if alpha is None else alpha
+
     for page in getMongoCollection('page_data').find({}):
 
         coverage_sum = page['abbyy']['coverage_sum'] if 'coverage_sum' in page['abbyy'] else 0
@@ -193,6 +196,9 @@ def parallelCoordinates(request):
 
     import json
     from django.utils.safestring import mark_safe
-    return render_to_response('pcoords.html', {'data': mark_safe(json.dumps(result))})
+    return render_to_response('pcoords.html', {
+        'data': mark_safe(json.dumps(result)),
+        'alpha': alpha
+    })
 
 
