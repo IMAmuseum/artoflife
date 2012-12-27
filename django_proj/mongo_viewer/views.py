@@ -174,3 +174,25 @@ def renderIAImage(request, scan_id, index, size=None):
             shutil.copyfileobj(req, fp)
 
     return HttpResponse(open(cache_file), mimetype='image/jpeg')
+
+
+def parallelCoordinates(request):
+
+    result = []
+
+    for page in getMongoCollection('page_data').find({}):
+
+        coverage_sum = page['abbyy']['coverage_sum'] if 'coverage_sum' in page['abbyy'] else 0
+
+        result.append({
+            'gold': page['has_illustration']['gold_standard'],
+            'cov': round(coverage_sum, 2),
+            'comp': round(100 * page['compression'], 2),
+            'cont': round(100 * page['contrast']['max_contiguous'], 2)
+        })
+
+    import json
+    from django.utils.safestring import mark_safe
+    return render_to_response('pcoords.html', {'data': mark_safe(json.dumps(result))})
+
+

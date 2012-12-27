@@ -1,4 +1,6 @@
 from django.conf.urls import patterns, include, url
+from django.views.static import * 
+from django.conf import settings
 
 # Uncomment the next two lines to enable the admin:
 #from django.contrib import admin
@@ -14,6 +16,9 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
+
+    # Required to make static serving work 
+    url(r'^files/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'files'}),
 
     # A view screen for abbyy scan data
     url(r'^abbyy_viewer/$', 'abbyy_viewer.views.scandata'),
@@ -35,8 +40,8 @@ urlpatterns = patterns('',
     url(r'^mongo/compression-histogram/$', 'mongo_viewer.views.compressionHistogram'),
     url(r'^mongo/ia-thumb/(?P<scan_id>.+)/(?P<index>\d+)$', 'mongo_viewer.views.thumbImage'),
     url(r'^mongo/ia-image/(?P<scan_id>.+)/(?P<index>\d+)$', 'mongo_viewer.views.renderIAImage'),
+    url(r'^mongo/pcoords/$', 'mongo_viewer.views.parallelCoordinates'),
 
     url(r'^mongo/set-has-illustration$', 'mongo_viewer.callbacks.setHasIllustration')
-
 
 )
