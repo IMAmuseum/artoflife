@@ -39,7 +39,7 @@ urlpatterns = patterns('',
     url(r'^mongo/coverage-histogram/$', 'mongo_viewer.views.coverageHistogram'),
     url(r'^mongo/compression-histogram/$', 'mongo_viewer.views.compressionHistogram'),
     url(r'^mongo/ia-thumb/(?P<scan_id>.+)/(?P<index>\d+)$', 'mongo_viewer.views.thumbImage'),
-    url(r'^mongo/ia-image/(?P<scan_id>.+)/(?P<index>\d+)$', 'mongo_viewer.views.renderIAImage'),
+    #url(r'^mongo/ia-image/(?P<scan_id>.+)/(?P<index>\d+)$', 'mongo_viewer.views.renderIAImage'),
     url(r'^mongo/pcoords/$', 'mongo_viewer.views.parallelCoordinates'),
 
     url(r'^mongo/set-has-illustration$', 'mongo_viewer.callbacks.setHasIllustration')

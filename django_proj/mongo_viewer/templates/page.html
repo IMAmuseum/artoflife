@@ -5,10 +5,12 @@
         {% if page.abbyy.coverage_sum %}
             <a href='/mongo/picture_blocks/{{scan_id}}/{{page.ia_page_num}}'>
                 <img style='background-image: url(/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}})' 
-                     class='svg-blocks' src='/mongo/picture_blocks/{{ scan_id }}/{{ page.ia_page_num }}.svg' />
+                     class='svg-blocks' src='/mongo/picture_blocks/{{ scan_id }}/{{ page.ia_page_num }}.svg?sw=1%' />
             </a>
         {% else %}
-            <img class='no-blocks' src='/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}' />
+            <a href='http://www.archive.org/download/{{scan_id}}/page/n{{page.ia_page_num}}'>
+                <img class='no-blocks' src='/mongo/ia-thumb/{{scan_id}}/{{page.ia_page_num}}' />
+            </a>
         {% endif %}        
 
     </div>

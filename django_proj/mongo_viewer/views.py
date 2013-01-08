@@ -80,10 +80,20 @@ def pageWithPictureBlocks(request, scan_id, page_id):
 
 
 def pictureBlocksAsSVG(request, scan_id, page_id):
+    """
+    Render the picture blocks for a page as an SVG image
+    """
 
+    # Fetch the page from mongodb
     collection = getMongoCollection('page_data')
     page = collection.find_one({'scan_id': scan_id, 'ia_page_num': int(page_id)})
 
+    # Allow stroke width as a URL parameter
+    stroke_width = request.GET.get('sw')
+    if stroke_width is None:
+        stroke_width = '0.25%'
+
+    # Convert block data to x,y,w,h
     rects = []
     if 'abbyy' in page:
         if 'picture_blocks' in page['abbyy']:
@@ -95,10 +105,12 @@ def pictureBlocksAsSVG(request, scan_id, page_id):
                     'h': block['b'] - block['t']
                 })
 
+    # Render the response
     return HttpResponse(render_to_response('picture_blocks.svg', {
         'height': page['abbyy']['height'],
         'width': page['abbyy']['width'],
-        'rects': rects
+        'rects': rects,
+        'stroke_width': stroke_width
     }), content_type='image/svg+xml')
 
 
