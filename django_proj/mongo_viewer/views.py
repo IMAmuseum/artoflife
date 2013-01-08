@@ -84,8 +84,6 @@ def pictureBlocksAsSVG(request, scan_id, page_id):
     collection = getMongoCollection('page_data')
     page = collection.find_one({'scan_id': scan_id, 'ia_page_num': int(page_id)})
 
-    print page
-
     rects = []
     if 'abbyy' in page:
         if 'picture_blocks' in page['abbyy']:
