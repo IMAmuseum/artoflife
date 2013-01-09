@@ -188,7 +188,9 @@ def renderIAImage(request, scan_id, index, size=None):
 
 def parallelCoordinates(request):
 
-    result = []
+    from collections import deque
+
+    result = deque()
 
     alpha = request.GET.get('alpha')
     alpha = 0.8 if alpha is None else alpha
@@ -197,17 +199,22 @@ def parallelCoordinates(request):
 
         coverage_sum = page['abbyy']['coverage_sum'] if 'coverage_sum' in page['abbyy'] else 0
 
-        result.append({
+        data = {
             'gold': page['has_illustration']['gold_standard'],
             'cov': round(coverage_sum, 2),
             'comp': round(100 * page['compression'], 2),
             'cont': round(100 * page['contrast']['max_contiguous'], 2)
-        })
+        }
+
+        if (page['has_illustration']['gold_standard']):
+            result.append(data)
+        else:
+            result.appendleft(data)
 
     import json
     from django.utils.safestring import mark_safe
     return render_to_response('pcoords.html', {
-        'data': mark_safe(json.dumps(result)),
+        'data': mark_safe(json.dumps(list(result))),
         'alpha': alpha
     })
 
