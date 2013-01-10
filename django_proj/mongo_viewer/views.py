@@ -195,6 +195,8 @@ def parallelCoordinates(request):
     alpha = request.GET.get('alpha')
     alpha = 0.8 if alpha is None else alpha
 
+    illustration = request.GET.get('illustration')
+
     for page in getMongoCollection('page_data').find({}):
 
         coverage_sum = page['abbyy']['coverage_sum'] if 'coverage_sum' in page['abbyy'] else 0
@@ -207,9 +209,11 @@ def parallelCoordinates(request):
         }
 
         if (page['has_illustration']['gold_standard']):
-            result.append(data)
+            if (illustration != 'n'):
+                result.append(data)
         else:
-            result.appendleft(data)
+            if (illustration != 'y'):
+                result.appendleft(data)
 
     import json
     from django.utils.safestring import mark_safe

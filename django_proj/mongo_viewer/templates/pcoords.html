@@ -107,6 +107,20 @@ var line = change.add(pv.Panel)
     .strokeStyle(function(t,d) d['gold'] ? 'rgba(50, 100, 50, {{alpha}})' : 'rgba(200, 75, 75, {{alpha}})')
     .lineWidth(1);
 
+
+function countVisible() {
+
+  var n = 0;
+  for (var p in pcoords_data) {
+    if (dims.every(function(t) (pcoords_data[p][t] >= filter[t].min) && (pcoords_data[p][t] <= filter[t].max))) {
+      n += 1;
+    }
+  }
+
+  return n;
+
+}
+
 // Updater for slider and resizer.
 function update(d) {
   var t = d.dim;
@@ -114,6 +128,7 @@ function update(d) {
   filter[t].max = Math.min(y[t].domain()[1], y[t].invert(h - d.y));
   active = t;
   change.render();
+  document.getElementById('pct-selected').innerHTML = (100*countVisible()/parseFloat(pcoords_data.length)).toFixed(2);
   return false;
 }
 
@@ -126,6 +141,7 @@ function selectAll(d) {
     d.y = 0; d.dy = h;
     active = t;
     change.render();
+    document.getElementById('pct-selected').innerHTML = '100';
   }
   return false;
 }
@@ -166,7 +182,7 @@ vis.render();
 
     </script>
   </div></div>
-
+<p><span id='pct-selected'>100</span>% selected.</p>
 <p>Green lines indicate pages with illustrations, red lines indicate those without.</p>
 <p>Coverage - The sum of picture block coverage as a percentage of the page.</p>
 <p>Contrast - The percentage of the height given by the largest segment in the contrast algorithm.</p>
