@@ -1,18 +1,21 @@
-import argparse, csv, gzip, os, pymongo
+import argparse
+import csv
+import pymongo
 from time import clock
 from helpers import skipScanDataPage
 from xml.etree import cElementTree as ET
-
+import fetch_scandata
 
 if __name__ == "__main__":
 
     ap = argparse.ArgumentParser(description='csv-import')
+    ap.add_argument('--file', type=str, help='csv file to import', default=None)
     ap.add_argument('--scan', type=str, help='scan id', default=None)
     ap.add_argument('-v', help='verbose', action='store_true')
 
     args = ap.parse_args()
 
-    input_filename = 'BHL-gold-standard.csv'
+    input_filename = args.file
 
     control_file = open(input_filename, 'rU')
     control_reader = csv.reader(control_file)
@@ -35,6 +38,9 @@ if __name__ == "__main__":
         if not row[0] in control_data:
 
             print row[0]
+
+            #fetch data from Internet Archive to local
+            fetch_scandata.fetch_files(row[0])
 
             control_data[row[0]] = {'rows': [], 'n_image_pages': 0}
 

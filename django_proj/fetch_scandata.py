@@ -1,11 +1,6 @@
 import argparse
 import os
 
-ap = argparse.ArgumentParser(description='fetch')
-ap.add_argument('scan', type=str, help='scan id')
-
-args = ap.parse_args()
-
 
 def fetch_files(scan):
 
@@ -28,4 +23,10 @@ def fetch_files(scan):
             'file': scandata_file
         })
 
-fetch_files(args.scan)
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(description='fetch')
+    ap.add_argument('scan', type=str, help='scan id')
+
+    args = ap.parse_args()
+
+    fetch_files(args.scan)
