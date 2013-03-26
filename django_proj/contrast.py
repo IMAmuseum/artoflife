@@ -97,7 +97,7 @@ def processImage(img, scan_id, ia_page_index, pct_thresh=10):
     return info
 
 
-def runMongo(scan_id, page=None):
+def runMongo(scan_id, page=None, force=False):
 
     from helpers import getMongoCollection
 
@@ -111,22 +111,20 @@ def runMongo(scan_id, page=None):
         pages = coll.find({'scan_id': scan_id, 'scandata_index': page})
 
     for page in pages:
-        result = processPage(page['scan_id'], page['ia_page_num'])
+        if (force or 'contrast' not in page):
+            result = processPage(page['scan_id'], page['ia_page_num'])
 
-        page['has_illustration']['contrast'] = result['image_detected']
-        page['contrast'] = result
-        """
-        if not 'benchmarks' in page:
-            page['benchmarks'] = {
-                'contrast': {}
-            }
-        page['benchmarks']['contrast']['total'] = benchmarks['image_processing'][-1:][0]
-        """
+            page['has_illustration']['contrast'] = result['image_detected']
+            page['contrast'] = result
+            """
+            if not 'benchmarks' in page:
+                page['benchmarks'] = {
+                    'contrast': {}
+                }
+            page['benchmarks']['contrast']['total'] = benchmarks['image_processing'][-1:][0]
+            """
 
-        coll.save(page)
-
-        #print page
-
+            coll.save(page)
 
 if __name__ == '__main__':
 
@@ -138,11 +136,11 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser(description='picture block processing')
     ap.add_argument('--scan', type=str, help='scan id', default=None)
     ap.add_argument('--page', type=int, help='page #', default=None)
+    ap.add_argument('-f', help='force', action='store_true')
 
     args = ap.parse_args()
 
-    runMongo(args.scan, args.page)
+    runMongo(args.scan, args.page, args.f)
 
     print 'Avg image processing time:', average(benchmarks['image_processing']), 's'
     print 'Avg time for single dimension:', average(benchmarks['single_dim']), 's'
-

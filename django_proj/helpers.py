@@ -9,7 +9,7 @@ def combinePageData(scandata_pages, abbyy_pages, include_deleted=False):
 
     pages = []
     for i in range(0, len(scandata_pages)):
-        if (not include_deleted) and (scandata_pages[i].find('pageType').text == 'Delete'):
+        if (not include_deleted) and (scandata_pages[i].find('addToAccessFormats').text == 'false'):
             continue
         pages.append({
             'scandata': scandata_pages[i],
@@ -24,7 +24,7 @@ def skipScanDataPage(scandata_page):
     Determine whether a scandata page should be skipped
     """
 
-    if scandata_page.find('pageType').text == 'Delete':
+    if scandata_page.find('addToAccessFormats').text == 'false':
         return True
     if (int(scandata_page.find('origHeight').text) == 0) and (int(scandata_page.find('origWidth').text) == 0):
         return True

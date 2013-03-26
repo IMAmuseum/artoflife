@@ -23,7 +23,10 @@ def main(request):
         total_pages += pages.count()
 
     build_time = clock() - t
-    full_build_est = build_time * 40000000 / total_pages
+    if (total_pages > 0):
+        full_build_est = build_time * 40000000 / total_pages
+    else:
+        full_build_est = build_time * 40000000 / 1
 
     return render_to_response('main.html', {
         'scans': scan_info,

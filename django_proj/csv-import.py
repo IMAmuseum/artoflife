@@ -62,6 +62,8 @@ if __name__ == "__main__":
                 'scan_id': row[0],
                 'scandata_index': scandata_index,
                 'ia_page_num': ia_page_index,
+                'page_num': ia_page_index + 1,
+                'leaf_num': scandata_pages[scandata_index].get('leafNum'),
                 'has_illustration': {
                     'gold_standard': (row[6] == 'Yes')
                 }
