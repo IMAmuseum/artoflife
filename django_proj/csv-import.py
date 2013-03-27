@@ -57,7 +57,9 @@ if __name__ == "__main__":
             ia_page_index = 0
             scandata_index = 0
 
-        while(skipScanDataPage(scandata_pages[scandata_index])):
+        while(scandata_index < len(scandata_pages) and skipScanDataPage(scandata_pages[scandata_index])):
+            if args.v:
+                print 'Skipping ', scandata_index
             scandata_index += 1
 
         db_item = collection.find_one({'scan_id': row[0], 'ia_page_num': ia_page_index})
@@ -69,7 +71,7 @@ if __name__ == "__main__":
                 'scandata_index': scandata_index,
                 'ia_page_num': ia_page_index,
                 'page_num': ia_page_index + 1,
-                'leaf_num': scandata_pages[scandata_index].get('leafNum'),
+                'leaf_num': scandata_pages[scandata_index].get('leafNum') if (scandata_index < len(scandata_pages)) else '',
                 'has_illustration': {
                     'gold_standard': (row[6] == 'Yes')
                 }
