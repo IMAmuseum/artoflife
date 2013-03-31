@@ -6,10 +6,11 @@ def analyzePage(page):
     if 'alg_result' not in page:
         page['alg_result'] = {}
 
-    page['alg_result']['abbyy'] = classifyResult(
-        page['has_illustration']['gold_standard'],
-        (len(page['abbyy']['picture_blocks']) > 0)
-    )
+    if 'abbyy' in page:
+        page['alg_result']['abbyy'] = classifyResult(
+            page['has_illustration']['gold_standard'],
+            (len(page['abbyy']['picture_blocks']) > 0)
+        )
 
     if 'contrast' in page['has_illustration']:
         page['alg_result']['contrast'] = classifyResult(
@@ -56,7 +57,11 @@ def analyzePages(pages):
 
         for alg in algorithms:
             #if alg == 'abbyy' or alg == 'color' or alg in page['has_illustration']:
-            info[alg]['n-' + page['alg_result'][alg]] += 1
+            try:
+                alg_result = page['alg_result'][alg]
+                info[alg]['n-' + alg_result] += 1
+            except KeyError:
+                alg_result = '' 
 
         info['pages'].append(page)
 
