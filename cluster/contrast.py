@@ -1,60 +1,75 @@
 import os
 from PIL import Image
+import helper
+
 
 def convert(working_file, command):
     os.system('convert ' + working_file + ' ' + command + ' ' + working_file)
 
-def processImage(img, scan_id, ia_page_index, pct_thresh=10):
 
-    if not os.path.exists('tmp/contrast'):
-        os.mkdir('tmp/contrast')
-    if not os.path.exists('tmp/contrast/%s' % (scan_id)):
-        os.mkdir('tmp/contrast/%s' % (scan_id))
+def processImage(page, pct_thresh=10):
 
-    working_file = 'tmp/contrast/%s/%s_contrast_%s.png' % (scan_id, scan_id, ia_page_index)
+    try:
+        helper.log.debug("contrast for scan_id: %s" % (page['scan_id']))
 
-    img.save(working_file)
+        img = helper.getIAImage(page['scan_id'], page['ia_page_num'])
 
-    # desaturate
-    convert(working_file, '-colorspace Gray')
+        base_path = '%s/contrast' % (helper.base_path)
 
-    # apply heavy contrast
-    convert(working_file, '-contrast -contrast -contrast -contrast -contrast -contrast -contrast -contrast')
+        if not os.path.exists(base_path):
+            os.mkdir(base_path)
+        if not os.path.exists('%s/%s' % (base_path, page['scan_id'])):
+            os.mkdir('%s/%s' % (base_path, page['scan_id']))
 
-    processing_size = 500
+        working_file = '%s/%s/%s_contrast_%s.png' % (base_path, page['scan_id'], page['scan_id'], page['ia_page_num'])
 
-    # resize to 1px width
-    convert(working_file, '-resize 1x%d!' % (processing_size))
+        img.save(working_file)
 
-    # sharpen
-    convert(working_file, '-sharpen 0x5')
+        # desaturate
+        convert(working_file, '-colorspace Gray')
 
-    # convert to grayscale
-    convert(working_file, '-negate -threshold 0 -negate')
+        # apply heavy contrast
+        convert(working_file, '-contrast -contrast -contrast -contrast -contrast -contrast -contrast -contrast')
 
-    # identify long lines
-    w_compressed = Image.open(working_file)
+        processing_size = 500
 
-    info = {
-        'max_contiguous': 0,
-        'image_detected': False,
-    }
+        # resize to 1px width
+        convert(working_file, '-resize 1x%d!' % (processing_size))
 
-    pixel_data = list(w_compressed.getdata())
-    n_contig = 0
-    for p in pixel_data:
-        if p == 0:
-            n_contig += 1
-        else:
-            info['max_contiguous'] = max(info['max_contiguous'], n_contig)
-            n_contig = 0
+        # sharpen
+        convert(working_file, '-sharpen 0x5')
 
-    del w_compressed
-    os.remove(working_file)
+        # convert to grayscale
+        convert(working_file, '-negate -threshold 0 -negate')
 
-    info['max_contiguous'] = float(info['max_contiguous']) / processing_size
+        # identify long lines
+        w_compressed = Image.open(working_file)
 
-    if (info['max_contiguous'] > pct_thresh / 100.0):
-        info['image_detected'] = True
+        info = {
+            'max_contiguous': 0,
+            'image_detected': False,
+        }
 
-    return info
+        pixel_data = list(w_compressed.getdata())
+        n_contig = 0
+        for p in pixel_data:
+            if p == 0:
+                n_contig += 1
+            else:
+                info['max_contiguous'] = max(info['max_contiguous'], n_contig)
+                n_contig = 0
+
+        del w_compressed
+        os.remove(working_file)
+
+        info['max_contiguous'] = float(info['max_contiguous']) / processing_size
+
+        if (info['max_contiguous'] > pct_thresh / 100.0):
+            info['image_detected'] = True
+
+        helper.log.debug("contrast complete for scan_id: %s" % (page['scan_id']))
+
+        return info
+    except:
+        helper.log.error("compression error for scan_id: %s" % (page['scan_id']))
+        return False
