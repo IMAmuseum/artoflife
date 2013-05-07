@@ -47,8 +47,17 @@ if __name__ == "__main__":
             scan_id = row[0]
             scandata_file = 'scandata/%s/%s_scandata.xml' % (scan_id, scan_id)
 
+            if args.v:
+                print 'scandata_file: ', scandata_file
+
             t = clock()
-            scandata = ET.parse(scandata_file)
+            try:
+                scandata = ET.parse(scandata_file)
+            except:
+                if args.v:
+                    print 'error reading scandata file: ', scandata_file
+                continue
+
             scandata_pages = scandata.find('pageData').findall('page')
 
             if args.v:
