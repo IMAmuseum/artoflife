@@ -26,8 +26,12 @@ def skipScanDataPage(scandata_page):
 
     if scandata_page.find('addToAccessFormats').text == 'false':
         return True
-    if (int(scandata_page.find('origHeight').text) == 0) and (int(scandata_page.find('origWidth').text) == 0):
-        return True
+
+    try:
+        if (int(scandata_page.find('origHeight').text) == 0) and (int(scandata_page.find('origWidth').text) == 0):
+            return True
+    except:
+        return False
 
     return False
 

@@ -3,7 +3,7 @@ import csv
 import pymongo
 from time import clock
 from helpers import skipScanDataPage
-from xml.etree import cElementTree as ET
+from xml.etree import ElementTree as ET
 import fetch_scandata
 
 if __name__ == "__main__":
@@ -48,7 +48,11 @@ if __name__ == "__main__":
             scandata_file = 'scandata/%s/%s_scandata.xml' % (scan_id, scan_id)
 
             t = clock()
-            scandata = ET.parse(scandata_file)
+            scan_file = open(scandata_file)
+            scan_file_string = scan_file.read()
+            scan_file_string = scan_file_string.replace('xmlns="http://archive.org/scribe/xml"', '')
+
+            scandata = ET.fromstring(scan_file_string)
             scandata_pages = scandata.find('pageData').findall('page')
 
             if args.v:
