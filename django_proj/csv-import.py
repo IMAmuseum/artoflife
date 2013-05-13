@@ -47,12 +47,21 @@ if __name__ == "__main__":
             scan_id = row[0]
             scandata_file = 'scandata/%s/%s_scandata.xml' % (scan_id, scan_id)
 
-            t = clock()
-            scan_file = open(scandata_file)
-            scan_file_string = scan_file.read()
-            scan_file_string = scan_file_string.replace('xmlns="http://archive.org/scribe/xml"', '')
+            if args.v:
+                print 'scandata_file: ', scandata_file
 
-            scandata = ET.fromstring(scan_file_string)
+            t = clock()
+
+            try:
+                scan_file = open(scandata_file)
+                scan_file_string = scan_file.read()
+                scan_file_string = scan_file_string.replace('xmlns="http://archive.org/scribe/xml"', '')
+                scandata = ET.fromstring(scan_file_string)
+            except:
+                if args.v:
+                    print 'error reading scandata file: ', scandata_file
+                continue
+
             scandata_pages = scandata.find('pageData').findall('page')
 
             if args.v:
