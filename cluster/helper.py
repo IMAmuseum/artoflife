@@ -4,10 +4,12 @@ from cStringIO import StringIO
 from PIL import Image
 from urllib import urlopen
 import logging
+import urllib2
+from xml.etree import cElementTree as ET
 
 
 base_path = '/tmp/ia'
-base_url = 'http://www.archive.org/download'
+base_url = 'http://www.archive.org'
 log = logging.getLogger('helper')
 log.setLevel(logging.ERROR)
 log.addHandler(logging.StreamHandler())
@@ -52,21 +54,74 @@ def fetch_files(scan):
     abbyy_file = '%s_abbyy.gz' % (scan)
     scandata_file = '%s_scandata.xml' % (scan)
 
+    abbyyLocalPath = '%(dir)s/%(file)s' % {
+        'dir': dest_dir,
+        'file': abbyy_file
+    }
+
+    scanLocalPath = '%(dir)s/%(file)s' % {
+        'dir': dest_dir,
+        'file': scandata_file
+    }
+
     if not os.path.exists(dest_dir):
         os.mkdir(dest_dir)
-    if not os.path.exists(dest_dir + '/' + abbyy_file):
-        log.debug("fetching abbyy file")
-        os.system('wget %(url)s/%(scan)s/%(file)s -O %(dir)s/%(file)s' % {
-            'scan': scan,
-            'dir': dest_dir,
-            'file': abbyy_file,
-            'url': base_url
-        })
-    if not os.path.exists(dest_dir + '/' + scandata_file):
-        log.debug("fetching scandata file")
-        os.system('wget %(url)s/%(scan)s/%(file)s -O %(dir)s/%(file)s' % {
-            'scan': scan,
-            'dir': dest_dir,
-            'file': scandata_file,
-            'url': base_url
-        })
+
+    if not os.path.exists(abbyyLocalPath):
+        try:
+            url = '%(url)s/download/%(scan)s/%(file)s' % {
+                'scan': scan,
+                'file': abbyy_file,
+                'url': base_url
+            }
+            f = urllib2.urlopen(url)
+            with open(abbyyLocalPath, "wb") as local_file:
+                local_file.write(f.read())
+        except urllib2.HTTPError, e:
+            log.error("HTTP Error:", e.code, url)
+        except urllib2.URLError, e:
+            log.error("URL Error:", e.reason, url)
+
+    if not os.path.exists(scanLocalPath):
+        try:
+            url = '%(url)s/download/%(scan)s/%(file)s' % {
+                'scan': scan,
+                'file': scandata_file,
+                'url': base_url
+            }
+
+            f = urllib2.urlopen(url)
+            with open(scanLocalPath, "wb") as local_file:
+                local_file.write(f.read())
+
+        except urllib2.HTTPError, e:
+            log.error("HTTP Error:", e.code, url)
+            if (e.code == 404):
+                url = '%(url)s/services/find_file.php?file=%(scan)s&loconly=1' % {
+                    'scan': scan,
+                    'url': base_url
+                }
+                try:
+                    xmlFile = urllib2.urlopen(url).read()
+                    location = ET.fromstring(xmlFile)
+                    locationHost = location[0].attrib['host']
+                    locationDir = location[0].attrib['dir']
+
+                    url = 'http://%(host)s/zipview.php?zip=%(dir)s/scandata.zip&file=scandata.xml' % {
+                        'host': locationHost,
+                        'dir': locationDir
+                    }
+                    try:
+                        f = urllib2.urlopen(url)
+                        with open(scanLocalPath, "wb") as local_file:
+                            local_file.write(f.read())
+                    except urllib2.HTTPError, e:
+                        log.error("HTTP Error:", e.code, url)
+                    except urllib2.URLError, e:
+                        log.error("URL Error:", e.reason, url)
+                except urllib2.HTTPError, e:
+                    log.error("HTTP Error:", e.code, url)
+                except urllib2.URLError, e:
+                    log.error("URL Error:", e.reason, url)
+        except urllib2.URLError, e:
+            log.error("URL Error:", e.reason, url)
