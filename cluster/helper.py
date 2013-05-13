@@ -11,7 +11,7 @@ from xml.etree import cElementTree as ET
 base_path = '/tmp/ia'
 base_url = 'http://www.archive.org'
 log = logging.getLogger('helper')
-log.setLevel(logging.ERROR)
+log.setLevel(logging.DEBUG)
 log.addHandler(logging.StreamHandler())
 
 
@@ -39,6 +39,7 @@ def getIAImage(book_id, ia_page_index):
     img_file = StringIO(urlopen(url).read())
     image = Image.open(img_file)
     image.save(tmp_file)
+    os.chmod(tmp_file, 0664)
 
     return image
 
@@ -77,6 +78,7 @@ def fetch_files(scan):
             f = urllib2.urlopen(url)
             with open(abbyyLocalPath, "wb") as local_file:
                 local_file.write(f.read())
+                os.chmod(local_file, 0664)
         except urllib2.HTTPError, e:
             log.error("HTTP Error:", e.code, url)
         except urllib2.URLError, e:
@@ -93,6 +95,7 @@ def fetch_files(scan):
             f = urllib2.urlopen(url)
             with open(scanLocalPath, "wb") as local_file:
                 local_file.write(f.read())
+                os.chmod(local_file, 0664)
 
         except urllib2.HTTPError, e:
             log.error("HTTP Error:", e.code, url)
@@ -115,6 +118,7 @@ def fetch_files(scan):
                         f = urllib2.urlopen(url)
                         with open(scanLocalPath, "wb") as local_file:
                             local_file.write(f.read())
+                            os.chmod(local_file, 0664)
                     except urllib2.HTTPError, e:
                         log.error("HTTP Error:", e.code, url)
                     except urllib2.URLError, e:
