@@ -5,6 +5,7 @@ from PIL import Image
 from urllib import urlopen
 import logging
 import urllib2
+import gzip
 from xml.etree import cElementTree as ET
 
 
