@@ -96,11 +96,14 @@ def fetch_files(scan):
 
     if os.path.exists(abbyyLocalPath):
         if not os.path.exists(abbyyLocalPathUncompressed):
-            abbyy = gzip.open(abbyyLocalPath)
+            log.debug("abbyy file uncompressed: %s" % (abbyyLocalPathUncompressed))
+            f = gzip.open(abbyyLocalPath)
+            log.debug("abbyy file uncompressed opened")
             with open(abbyyLocalPathUncompressed, "wb") as local_file:
-                local_file.write(abbyy.read())
+                local_file.write(f.read())
                 os.chmod(local_file, 0664)
-            abbyy.close()
+            log.debug("abbyy file uncompressed written")
+            f.close()
             log.debug("abbyy file uncompressed: %s" % (abbyyLocalPathUncompressed))
 
     if not os.path.exists(scanLocalPath):
