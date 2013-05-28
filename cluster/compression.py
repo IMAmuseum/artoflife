@@ -16,6 +16,8 @@ def processImage(page):
 
         helper.log.debug("compression complete for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
 
+        image.close()
+
         return {
             'file_size': filesize,
             'bytes_per_pixel': float(filesize) / area,

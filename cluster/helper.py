@@ -54,11 +54,17 @@ def fetch_files(scan):
 
     dest_dir = '%s/scandata/%s' % (base_path, scan)
     abbyy_file = '%s_abbyy.gz' % (scan)
+    abbyy_file_uncompressed = '%s_abbyy' % (scan)
     scandata_file = '%s_scandata.xml' % (scan)
 
     abbyyLocalPath = '%(dir)s/%(file)s' % {
         'dir': dest_dir,
         'file': abbyy_file
+    }
+
+    abbyyLocalPathUncompressed = '%(dir)s/%(file)s' % {
+        'dir': dest_dir,
+        'file': abbyy_file_uncompressed
     }
 
     scanLocalPath = '%(dir)s/%(file)s' % {
@@ -80,11 +86,20 @@ def fetch_files(scan):
             with open(abbyyLocalPath, "wb") as local_file:
                 local_file.write(f.read())
                 os.chmod(local_file, 0664)
+            f.close()
             helper.log.debug("abbyy file saved: %s" % (abbyyLocalPath))
         except urllib2.HTTPError, e:
             log.error("HTTP Error:", e.code, url)
         except urllib2.URLError, e:
             log.error("URL Error:", e.reason, url)
+
+    if not os.path.exists(abbyyLocalPathUncompressed):
+        abbyy = gzip.open(abbyyLocalPath)
+        with open(abbyyLocalPathUncompressed) as local_file:
+            local_file.write(abbyy.read())
+            os.chmod(local_file, 0664)
+        abbyy.close()
+        helper.log.debug("abbyy file uncompressed: %s" % (abbyyLocalPathUncompressed))
 
     if not os.path.exists(scanLocalPath):
         try:
@@ -98,6 +113,7 @@ def fetch_files(scan):
             with open(scanLocalPath, "wb") as local_file:
                 local_file.write(f.read())
                 os.chmod(local_file, 0664)
+            f.close()
             helper.log.debug("scandata file saved: %s" % (scanLocalPath))
 
         except urllib2.HTTPError, e:
@@ -122,6 +138,7 @@ def fetch_files(scan):
                         with open(scanLocalPath, "wb") as local_file:
                             local_file.write(f.read())
                             os.chmod(local_file, 0664)
+                        f.close()
                     except urllib2.HTTPError, e:
                         log.error("HTTP Error:", e.code, url)
                     except urllib2.URLError, e:

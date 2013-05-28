@@ -69,6 +69,8 @@ def processImage(page, pct_thresh=10):
 
         helper.log.debug("contrast complete for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
 
+        img.close()
+
         return info
     except:
         helper.log.error("contrast error for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
