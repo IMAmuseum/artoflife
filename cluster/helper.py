@@ -88,19 +88,20 @@ def fetch_files(scan):
                 local_file.write(f.read())
                 os.chmod(local_file, 0664)
             f.close()
-            helper.log.debug("abbyy file saved: %s" % (abbyyLocalPath))
+            log.debug("abbyy file saved: %s" % (abbyyLocalPath))
         except urllib2.HTTPError, e:
             log.error("HTTP Error:", e.code, url)
         except urllib2.URLError, e:
             log.error("URL Error:", e.reason, url)
 
-    if not os.path.exists(abbyyLocalPathUncompressed):
-        abbyy = gzip.open(abbyyLocalPath)
-        with open(abbyyLocalPathUncompressed) as local_file:
-            local_file.write(abbyy.read())
-            os.chmod(local_file, 0664)
-        abbyy.close()
-        helper.log.debug("abbyy file uncompressed: %s" % (abbyyLocalPathUncompressed))
+    if os.path.exists(abbyyLocalPath):
+        if not os.path.exists(abbyyLocalPathUncompressed):
+            abbyy = gzip.open(abbyyLocalPath)
+            with open(abbyyLocalPathUncompressed, "wb") as local_file:
+                local_file.write(abbyy.read())
+                os.chmod(local_file, 0664)
+            abbyy.close()
+            log.debug("abbyy file uncompressed: %s" % (abbyyLocalPathUncompressed))
 
     if not os.path.exists(scanLocalPath):
         try:
@@ -115,7 +116,7 @@ def fetch_files(scan):
                 local_file.write(f.read())
                 os.chmod(local_file, 0664)
             f.close()
-            helper.log.debug("scandata file saved: %s" % (scanLocalPath))
+            log.debug("scandata file saved: %s" % (scanLocalPath))
 
         except urllib2.HTTPError, e:
             log.error("HTTP Error:", e.code, url)
