@@ -72,10 +72,10 @@ def getPageForProcessing(collection, force):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description='picture block processing')
-    ap.add_argument('-f', help='force', action='store_true')
+    ap.add_argument('-f', help='force', action='store_false')
 
     args = ap.parse_args()
-    
+
     helper.log.debug("starting processing")
     processCollection(args.f)
     helper.log.debug("end processing")
