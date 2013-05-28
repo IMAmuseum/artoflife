@@ -4,7 +4,7 @@ import helper
 def processImage(page):
 
     try:
-        helper.log.debug("compression for scan_id: %s" % (page['scan_id']))
+        helper.log.debug("compression for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
 
         image = helper.getIAImage(page['scan_id'], page['ia_page_num'])
 
@@ -14,7 +14,7 @@ def processImage(page):
 
         filesize = image.tell()
 
-        helper.log.debug("compression complete for scan_id: %s" % (page['scan_id']))
+        helper.log.debug("compression complete for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
 
         return {
             'file_size': filesize,
@@ -23,5 +23,5 @@ def processImage(page):
             'compression': float(filesize) * 8 / (area * mode_to_bpp[image.mode])
         }
     except:
-        helper.log.error("compression error scan_id: %s" % (page['scan_id']))
+        helper.log.error("compression error scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
         return False

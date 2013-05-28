@@ -10,7 +10,7 @@ def convert(working_file, command):
 def processImage(page, pct_thresh=10):
 
     try:
-        helper.log.debug("contrast for scan_id: %s" % (page['scan_id']))
+        helper.log.debug("contrast for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
 
         img = helper.getIAImage(page['scan_id'], page['ia_page_num'])
 
@@ -67,9 +67,9 @@ def processImage(page, pct_thresh=10):
         if (info['max_contiguous'] > pct_thresh / 100.0):
             info['image_detected'] = True
 
-        helper.log.debug("contrast complete for scan_id: %s" % (page['scan_id']))
+        helper.log.debug("contrast complete for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
 
         return info
     except:
-        helper.log.error("compression error for scan_id: %s" % (page['scan_id']))
+        helper.log.error("contrast error for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
         return False

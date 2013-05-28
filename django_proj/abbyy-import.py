@@ -14,35 +14,42 @@ def importScan(scan_id, force=False):
 
     for result in collection.find({'scan_id': scan_id}):
 
-        abbyy_page = abbyy_pages[result['scandata_index']]
+	if (result['scandata_index'] < len(abbyy_pages)):
+            abbyy_page = abbyy_pages[result['scandata_index']]
 
-        if (force or 'abbyy' not in result):
+            if (force or 'abbyy' not in result):
 
-            result['abbyy'] = {
-                'width': int(abbyy_page.attrib['width']),
-                'height': int(abbyy_page.attrib['height']),
-                'picture_blocks': [],
-                'total_coverage_sum': 0
-            }
+                result['abbyy'] = {
+                    'width': int(abbyy_page.attrib['width']),
+                    'height': int(abbyy_page.attrib['height']),
+                    'picture_blocks': [],
+                    'total_coverage_sum': 0
+                }
 
-            blocks = abbyy_page.findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block")
-            for block in blocks:
-                if block.attrib['blockType'] == 'Picture':
-                    result['abbyy']['picture_blocks'].append({
-                        'blockType': block.attrib['blockType'],
-                        'r': int(block.attrib['r']),
-                        'l': int(block.attrib['l']),
-                        't': int(block.attrib['t']),
-                        'b': int(block.attrib['b'])
-                    })
-                area = (int(block.attrib['r']) - int(block.attrib['l'])) * (int(block.attrib['b']) - int(block.attrib['t']))
-                result['abbyy']['total_coverage_sum'] += 100 * area / (result['abbyy']['width'] * result['abbyy']['height'])
+                blocks = abbyy_page.findall("{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}block")
+                for block in blocks:
+                    if block.attrib['blockType'] == 'Picture':
+                        result['abbyy']['picture_blocks'].append({
+                            'blockType': block.attrib['blockType'],
+                            'r': int(block.attrib['r']),
+                            'l': int(block.attrib['l']),
+                            't': int(block.attrib['t']),
+                            'b': int(block.attrib['b'])
+                        })
+                    area = (int(block.attrib['r']) - int(block.attrib['l'])) * (int(block.attrib['b']) - int(block.attrib['t']))
+                    result['abbyy']['total_coverage_sum'] += 100 * area / (result['abbyy']['width'] * result['abbyy']['height'])
 
-            #print repr(result)
-        #print result['scandata_index']
+                #print repr(result)
+                #print result['scandata_index']
+        else:
+            result['abby'] = {}
+
         collection.save(result)
 
     print 'parsed', len(abbyy_pages), 'pages from abbyy data in', clock() - t, 's'
+
+    del abbyy
+    del abbyy_pages
 
 
 if __name__ == "__main__":
@@ -64,11 +71,12 @@ if __name__ == "__main__":
         importScan(args.scan, args.f)
     else:
         for scan_id in collection.distinct('scan_id'):
-            if not args.force and 'abbyy' in collection.find_one({'scan_id': scan_id}):
+            if not args.f and 'abbyy' in collection.find_one({'scan_id': scan_id}):
                 print 'abbyy data exists for', scan_id
             else:
                 print 'importing abbyy data for', scan_id
                 importScan(scan_id, args.f)
+                break
 
     print 'Completed in', clock() - t, 's'
 

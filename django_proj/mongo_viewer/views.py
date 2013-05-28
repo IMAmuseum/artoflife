@@ -123,8 +123,9 @@ def coverageHistogram(request):
 
     data = []
     for page in collection.find({}):
-        if ('coverage_sum' in page['abbyy']):
-            data.append(page['abbyy']['coverage_sum'])
+        if (page['abbyy_complete']):
+            if ('coverage_sum' in page['abbyy']):
+                data.append(page['abbyy']['coverage_sum'])
 
     return createHistogram(data, 'Sum of Picture Block Coverage')
 

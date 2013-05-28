@@ -144,8 +144,8 @@
 			
 		});
 
-		$('.golden-value').on('click', function() {
-
+		$('.golden-value').on('click', function(e) {
+			e.preventDefault();
 			$('#illustration_type').val($(this).text());
 			var selected = this;
 
@@ -164,7 +164,10 @@
 							},
 							'dataType': 'json',
 							'success': function(data) {
-								if (data.result == 'success') window.location.reload();
+								if (data.result == 'success') {
+									$(selected).text($('#illustration_type').val());
+								}
+								//if (data.result == 'success') window.location.reload();
 							} 
 						});
 						$(this).dialog("close"); 						

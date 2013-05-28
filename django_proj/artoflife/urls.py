@@ -18,7 +18,7 @@ urlpatterns = patterns('',
     # url(r'^admin/', include(admin.site.urls)),
 
     # Required to make static serving work 
-    url(r'^files/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'files'}),
+    url(r'^files/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 
     # A view screen for abbyy scan data
     url(r'^abbyy_viewer/$', 'abbyy_viewer.views.scandata'),

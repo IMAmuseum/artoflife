@@ -34,11 +34,12 @@ def getIAImage(book_id, ia_page_index):
         log.debug("loading image: %s" % (tmp_file))
         return Image.open(tmp_file)
 
-    url = '%s/%s/page/n%s' % (base_url, book_id, ia_page_index)
+    url = '%s/download/%s/page/n%s' % (base_url, book_id, ia_page_index)
     log.debug("fetching image: %s" % (url))
     img_file = StringIO(urlopen(url).read())
     image = Image.open(img_file)
     image.save(tmp_file)
+    log.debug("saved image: %s" % (tmp_file))
     os.chmod(tmp_file, 0664)
 
     return image
@@ -79,6 +80,7 @@ def fetch_files(scan):
             with open(abbyyLocalPath, "wb") as local_file:
                 local_file.write(f.read())
                 os.chmod(local_file, 0664)
+            helper.log.debug("abbyy file saved: %s" % (abbyyLocalPath))
         except urllib2.HTTPError, e:
             log.error("HTTP Error:", e.code, url)
         except urllib2.URLError, e:
@@ -96,6 +98,7 @@ def fetch_files(scan):
             with open(scanLocalPath, "wb") as local_file:
                 local_file.write(f.read())
                 os.chmod(local_file, 0664)
+            helper.log.debug("scandata file saved: %s" % (scanLocalPath))
 
         except urllib2.HTTPError, e:
             log.error("HTTP Error:", e.code, url)
