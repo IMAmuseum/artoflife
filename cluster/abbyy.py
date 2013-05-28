@@ -1,19 +1,27 @@
 import helper
 from xml.etree import cElementTree as ET
 
+def parseABBYY(scanId):
+    helper.fetch_files(scanId)
+    abbyy_file = '%s/scandata/%s/%s_abbyy' % (helper.base_path, scanId, scanId)
+    helper.log.debug("abbyy_file: %s" % (abbyy_file))
+    f = open(abbyy_file)
+    return ET.parse(f)
+    f.close()
 
-def processABBYY(page):
+
+def processABBYY(page, abbyy):
 
     try:
         scan_id = page['scan_id']
         helper.log.debug("ABBYY for scan_id: %s page_num: %s" % (scan_id, page['ia_page_num']))
-        helper.fetch_files(scan_id)
-        abbyy_file = '%s/scandata/%s/%s_abbyy' % (helper.base_path, scan_id, scan_id)
+        # helper.fetch_files(scan_id)
+        # abbyy_file = '%s/scandata/%s/%s_abbyy' % (helper.base_path, scan_id, scan_id)
 
-        helper.log.debug("abbyy_file: %s" % (abbyy_file))
-        f = open(abbyy_file)
-        abbyy = ET.parse(f)
-        f.close()
+        # helper.log.debug("abbyy_file: %s" % (abbyy_file))
+        # f = open(abbyy_file)
+        # abbyy = ET.parse(f)
+        # f.close()
         abbyy_pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
 
         abbyy_page = abbyy_pages[page['scandata_index']]

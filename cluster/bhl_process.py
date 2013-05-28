@@ -9,22 +9,30 @@ from time import time
 def processCollection(force=False):
     collection = helper.mongoConnect()
 
-    page = getPageForProcessing(collection, force)
-    while (page is not None):
-        processPage(page, force)
+    pages = getPagesForProcessing(collection, force)
+    while (pages is not None):
+        processPages(pages, collection, force)
+
+        pages = getPagesForProcessing(collection, force)
+
+
+def processPages(pages, collection, force=False):
+    abbyyParsed = None
+    for page in pages:
+        if abbyyParsed is None:
+            abbyyParsed = abbyy.parseABBYY(page['scan_id'])
+        processPage(page, abbyyParsed, force)
         collection.save(page)
 
-        page = getPageForProcessing(collection, force)
 
-
-def processPage(page, force):
+def processPage(page, abbyyParsed, force):
     if page is None:
         helper.log.debug('No pages for processing')
         return
     else:
         helper.log.debug('Starting Processing for scan_id: %s' % (page['scan_id']))
         if (page['abbyy_complete'] is False or force):
-            result = abbyy.processABBYY(page)
+            result = abbyy.processABBYY(page, abbyyParsed)
             if (result is not False):
                 page['abbyy'] = result
                 page['has_illustration']['abbyy'] = result['image_detected']
@@ -47,7 +55,7 @@ def processPage(page, force):
         page['processing_lock_end'] = time()
 
 
-def getPageForProcessing(collection, force):
+def getPagesForProcessing(collection, force):
     if (force):
         page = collection.find_one({
             'processing_lock': False
@@ -64,10 +72,16 @@ def getPageForProcessing(collection, force):
         helper.log.debug("No unprocessed pages found in mongo")
         return None
     else:
-        page['processing_lock'] = True
-        page['processing_lock_start'] = time()
-        collection.save(page)
-        return page
+        scanId = page['scan_id']
+        collection.update({'scan_id': scanId}, {'$set': {'processing_lock': True, 'processing_lock_start': time()}})
+        pages = collection.find({
+            'scan_id': scanId
+        })
+
+        # page['processing_lock'] = True
+        # page['processing_lock_start'] = time()
+        # collection.save(page)
+        return pages
 
 
 if __name__ == '__main__':

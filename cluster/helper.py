@@ -99,7 +99,7 @@ def fetch_files(scan):
             log.debug("abbyy file uncompressed: %s" % (abbyyLocalPathUncompressed))
             f = gzip.open(abbyyLocalPath)
             log.debug("abbyy file uncompressed opened")
-            with open(abbyyLocalPathUncompressed, "wb") as local_file:
+            with open(abbyyLocalPathUncompressed, "w") as local_file:
                 local_file.write(f.read())
                 os.chmod(local_file, 0664)
             log.debug("abbyy file uncompressed written")
