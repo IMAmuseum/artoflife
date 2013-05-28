@@ -12,6 +12,7 @@ def processCollection(force=False):
     pages = getPagesForProcessing(collection, force)
     while (pages is not None):
         processPages(pages, collection, force)
+        pages.close()
 
         pages = getPagesForProcessing(collection, force)
 
@@ -76,7 +77,7 @@ def getPagesForProcessing(collection, force):
         collection.update({'scan_id': scanId}, {'$set': {'processing_lock': True, 'processing_lock_start': time()}})
         pages = collection.find({
             'scan_id': scanId
-        })
+        }, timeout=False)
 
         # page['processing_lock'] = True
         # page['processing_lock_start'] = time()
