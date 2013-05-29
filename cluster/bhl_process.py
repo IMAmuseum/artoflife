@@ -2,51 +2,50 @@ import abbyy
 import compression
 import contrast
 import helper
-import argparse
 from time import time
 
 
-def processCollection(force=False):
+def processCollection():
     collection = helper.mongoConnect()
 
-    pages = getPagesForProcessing(collection, force)
+    pages = getPagesForProcessing(collection)
     while (pages is not None):
-        processPages(pages, collection, force)
+        processPages(pages, collection)
         pages.close()
 
-        pages = getPagesForProcessing(collection, force)
+        pages = getPagesForProcessing(collection)
 
 
-def processPages(pages, collection, force=False):
+def processPages(pages, collection):
     abbyyParsed = None
     for page in pages:
         if abbyyParsed is None:
             abbyyParsed = abbyy.parseABBYY(page['scan_id'])
-        processPage(page, abbyyParsed, force)
+        processPage(page, abbyyParsed)
         saveId = collection.save(page)
         helper.log.debug('Save id: %s' % (saveId))
 
 
-def processPage(page, abbyyParsed, force):
+def processPage(page, abbyyParsed):
     if page is None:
         helper.log.debug('No pages for processing')
         return
     else:
         helper.log.debug('Starting Processing for scan_id: %s' % (page['scan_id']))
-        if (page['abbyy_complete'] is False or force):
+        if (page['abbyy_complete'] is False):
             result = abbyy.processABBYY(page, abbyyParsed)
             if (result is not False):
                 page['abbyy'] = result
                 page['has_illustration']['abbyy'] = result['image_detected']
                 page['abbyy_complete'] = True
 
-        if (page['compression_complete'] is False or force):
+        if (page['compression_complete'] is False):
             result = compression.processImage(page)
             if (result is not False):
                 page.update(result)
                 page['compression_complete'] = True
 
-        if (page['contrast_complete'] is False or force):
+        if (page['contrast_complete'] is False):
             result = contrast.processImage(page)
             if (result is not False):
                 page.update(result)
@@ -60,18 +59,13 @@ def processPage(page, abbyyParsed, force):
             (page['scan_id'], page['ia_page_num'], page['abbyy_complete'], page['compression_complete'], page['contrast_complete']))
 
 
-def getPagesForProcessing(collection, force):
-    if (force):
-        page = collection.find_one({
-            'processing_lock': False
-        })
-    else:
-        page = collection.find_one({
-            'processing_lock': False,
-            'abbyy_complete': False,
-            'compression_complete': False,
-            'contrast_complete': False
-        })
+def getPagesForProcessing(collection):
+    page = collection.find_one({
+        'processing_lock': False,
+        'abbyy_complete': False,
+        'compression_complete': False,
+        'contrast_complete': False
+    })
 
     if page is None:
         helper.log.debug("No unprocessed pages found in mongo")
@@ -93,11 +87,6 @@ def getPagesForProcessing(collection, force):
 
 
 if __name__ == '__main__':
-    ap = argparse.ArgumentParser(description='picture block processing')
-    ap.add_argument('-f', help='force', action='store_false')
-
-    args = ap.parse_args()
-
     helper.log.debug("starting processing")
-    processCollection(args.f)
+    processCollection()
     helper.log.debug("end processing")
