@@ -85,7 +85,7 @@ def getPagesForProcessing(collection, force):
             'compression_complete': False,
             'contrast_complete': False
         }, timeout=False)
-        helper.log.debug("%s pages for processing" % pages.count())
+        helper.log.debug("%s: %s pages for processing" % (scanId, pages.count()))
         # page['processing_lock'] = True
         # page['processing_lock_start'] = time()
         # collection.save(page)
