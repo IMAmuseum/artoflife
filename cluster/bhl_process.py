@@ -55,6 +55,9 @@ def processPage(page, abbyyParsed, force):
         page['processing_lock'] = False
         page['processing_lock_end'] = time()
 
+        helper.log.debug('Complete: %s|%s: abbyy: %s, compression: %s, contrast: %s' % 
+            (page['scan_id'], page['ia_page_num'], page['abbyy_complete'], page['compression_complete'], page['contrast_complete']))
+
 
 def getPagesForProcessing(collection, force):
     if (force):

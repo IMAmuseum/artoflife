@@ -1,6 +1,7 @@
 import helper
 from xml.etree import cElementTree as ET
 
+
 def parseABBYY(scanId):
     helper.fetch_files(scanId)
     abbyy_file = '%s/scandata/%s/%s_abbyy' % (helper.base_path, scanId, scanId)
