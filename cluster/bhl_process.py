@@ -80,7 +80,10 @@ def getPagesForProcessing(collection, force):
         scanId = page['scan_id']
         collection.update({'scan_id': scanId}, {'$set': {'processing_lock': True, 'processing_lock_start': time()}})
         pages = collection.find({
-            'scan_id': scanId
+            'scan_id': scanId,
+            'abbyy_complete': False,
+            'compression_complete': False,
+            'contrast_complete': False
         }, timeout=False)
 
         # page['processing_lock'] = True
