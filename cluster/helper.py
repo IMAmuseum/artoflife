@@ -5,7 +5,6 @@ from PIL import Image
 from urllib import urlopen
 import logging
 import urllib2
-import gzip
 from xml.etree import cElementTree as ET
 
 
@@ -55,17 +54,11 @@ def fetch_files(scan):
 
     dest_dir = '%s/scandata/%s' % (base_path, scan)
     abbyy_file = '%s_abbyy.gz' % (scan)
-    abbyy_file_uncompressed = '%s_abbyy' % (scan)
     scandata_file = '%s_scandata.xml' % (scan)
 
     abbyyLocalPath = '%(dir)s/%(file)s' % {
         'dir': dest_dir,
         'file': abbyy_file
-    }
-
-    abbyyLocalPathUncompressed = '%(dir)s/%(file)s' % {
-        'dir': dest_dir,
-        'file': abbyy_file_uncompressed
     }
 
     scanLocalPath = '%(dir)s/%(file)s' % {
@@ -93,18 +86,6 @@ def fetch_files(scan):
             log.error("HTTP Error:", e.code, url)
         except urllib2.URLError, e:
             log.error("URL Error:", e.reason, url)
-
-    if os.path.exists(abbyyLocalPath):
-        if not os.path.exists(abbyyLocalPathUncompressed):
-            log.debug("abbyy file uncompressed: %s" % (abbyyLocalPathUncompressed))
-            f = gzip.open(abbyyLocalPath)
-            log.debug("abbyy file uncompressed opened")
-            with open(abbyyLocalPathUncompressed, "w") as local_file:
-                local_file.write(f.read())
-                # os.chmod(local_file, 0664)
-            log.debug("abbyy file uncompressed written")
-            f.close()
-            log.debug("abbyy file uncompressed: %s" % (abbyyLocalPathUncompressed))
 
     if not os.path.exists(scanLocalPath):
         try:

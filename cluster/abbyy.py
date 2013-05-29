@@ -1,14 +1,16 @@
 import helper
 from xml.etree import cElementTree as ET
+import gzip
 
 
 def parseABBYY(scanId):
     helper.fetch_files(scanId)
-    abbyy_file = '%s/scandata/%s/%s_abbyy' % (helper.base_path, scanId, scanId)
+    abbyy_file = '%s/scandata/%s/%s_abbyy.gz' % (helper.base_path, scanId, scanId)
     helper.log.debug("abbyy_file: %s" % (abbyy_file))
-    f = open(abbyy_file)
-    return ET.parse(f)
+    f = gzip.open(abbyy_file)
+    parsed = ET.parse(f)
     f.close()
+    return parsed
 
 
 def processABBYY(page, abbyy):
