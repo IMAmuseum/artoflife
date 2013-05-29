@@ -23,7 +23,8 @@ def processPages(pages, collection, force=False):
         if abbyyParsed is None:
             abbyyParsed = abbyy.parseABBYY(page['scan_id'])
         processPage(page, abbyyParsed, force)
-        collection.save(page)
+        saveId = collection.save(page)
+        helper.log.debug('Save id: %s' % (saveId))
 
 
 def processPage(page, abbyyParsed, force):
