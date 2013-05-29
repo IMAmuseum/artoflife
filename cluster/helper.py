@@ -79,7 +79,7 @@ def fetch_files(scan):
             f = urllib2.urlopen(url)
             with open(abbyyLocalPath, "wb") as local_file:
                 local_file.write(f.read())
-                os.chmod(local_file, 0664)
+            os.chmod(abbyyLocalPath, 0664)
             f.close()
             log.debug("abbyy file saved: %s" % (abbyyLocalPath))
         except urllib2.HTTPError, e:
@@ -98,7 +98,7 @@ def fetch_files(scan):
             f = urllib2.urlopen(url)
             with open(scanLocalPath, "wb") as local_file:
                 local_file.write(f.read())
-                os.chmod(local_file, 0664)
+            os.chmod(scanLocalPath, 0664)
             f.close()
             log.debug("scandata file saved: %s" % (scanLocalPath))
 
@@ -123,7 +123,7 @@ def fetch_files(scan):
                         f = urllib2.urlopen(url)
                         with open(scanLocalPath, "wb") as local_file:
                             local_file.write(f.read())
-                            os.chmod(local_file, 0664)
+                        os.chmod(scanLocalPath, 0664)
                         f.close()
                     except urllib2.HTTPError, e:
                         log.error("HTTP Error:", e.code, url)
