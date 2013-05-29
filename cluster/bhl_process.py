@@ -31,6 +31,7 @@ def processPage(page, abbyyParsed):
         helper.log.debug('No pages for processing')
         return
     else:
+        startTime = time()
         helper.log.debug('Starting Processing for scan_id: %s' % (page['scan_id']))
         if (page['abbyy_complete'] is False):
             result = abbyy.processABBYY(page, abbyyParsed)
@@ -57,6 +58,7 @@ def processPage(page, abbyyParsed):
 
         helper.log.debug('Complete: %s|%s: abbyy: %s, compression: %s, contrast: %s' %
             (page['scan_id'], page['ia_page_num'], page['abbyy_complete'], page['compression_complete'], page['contrast_complete']))
+        helper.log.debug('Processing duration: %s' % (time() - startTime))
 
 
 def getPagesForProcessing(collection):
