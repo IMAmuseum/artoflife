@@ -91,6 +91,7 @@ if __name__ == "__main__":
                 'processing_lock': False,
                 'processing_lock_start': 0,
                 'processing_lock_end': 0,
+                'processing_error': False,
                 'abbyy_complete': False,
                 'compression_complete': False,
                 'contrast_complete': False
