@@ -9,8 +9,10 @@ def parseABBYY(scanId):
     helper.log.debug("abbyy_file: %s" % (abbyy_file))
     f = gzip.open(abbyy_file)
     parsed = ET.parse(f)
+    abbyy_pages = parsed.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
+    parsed = None
     f.close()
-    return parsed
+    return abbyy_pages
 
 
 def processABBYY(page, abbyy):
@@ -25,9 +27,9 @@ def processABBYY(page, abbyy):
         # f = open(abbyy_file)
         # abbyy = ET.parse(f)
         # f.close()
-        abbyy_pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
+        # abbyy_pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
 
-        abbyy_page = abbyy_pages[page['scandata_index']]
+        abbyy_page = abbyy[page['scandata_index']]
 
         result = {
             'width': int(abbyy_page.attrib['width']),
