@@ -5,12 +5,13 @@ from time import clock
 from helpers import skipScanDataPage
 from xml.etree import ElementTree as ET
 import fetch_scandata
+import json
+
 
 if __name__ == "__main__":
 
     ap = argparse.ArgumentParser(description='csv-import')
     ap.add_argument('--file', type=str, help='csv file to import', default=None)
-    ap.add_argument('--scan', type=str, help='scan id', default=None)
     ap.add_argument('-v', help='verbose', action='store_true')
 
     args = ap.parse_args()
@@ -21,64 +22,72 @@ if __name__ == "__main__":
     control_reader = csv.reader(control_file)
     control_reader.next()  # skip header
 
-    mongo_conn = pymongo.Connection('localhost', 27017)
-    mongo_db = mongo_conn.artoflife_final
-    collection = mongo_db.page_data
+    # mongo_conn = pymongo.Connection('localhost', 27017)
+    # mongo_db = mongo_conn.artoflife_final
+    # collection = mongo_db.page_data
 
     t0 = clock()
+    rowCount = 0
+    fileNumber = 0
 
     n_control = 0
     control_data = {}
     for row in control_reader:
 
-        if (args.scan is not None) and (row[0] != args.scan):
-            continue
+        if args.v:
+                print 'row: ', rowCount
 
-        # New scan encountered
-        if not row[0] in control_data:
+        if (rowCount % 1000 == 0):
+            fileNumber += 1
+            outputFileName = "scandata/json_load/data_%s.json" % (fileNumber)
 
-            print row[0]
+        with open(outputFileName, 'a') as outfile:
 
-            #fetch data from Internet Archive to local
-            fetch_scandata.fetch_files(row[0])
+            # New scan encountered
+            if not row[0] in control_data:
 
-            control_data[row[0]] = {'rows': [], 'n_image_pages': 0}
+                print row[0]
 
-            scan_id = row[0]
-            scandata_file = 'scandata/%s/%s_scandata.xml' % (scan_id, scan_id)
+                #fetch data from Internet Archive to local
+                fetch_scandata.fetch_files(row[0])
 
-            if args.v:
-                print 'scandata_file: ', scandata_file
+                control_data[row[0]] = {'rows': [], 'n_image_pages': 0}
 
-            t = clock()
+                scan_id = row[0]
+                scandata_file = 'scandata/%s/%s_scandata.xml' % (scan_id, scan_id)
 
-            try:
-                scan_file = open(scandata_file)
-                scan_file_string = scan_file.read()
-                scan_file_string = scan_file_string.replace('xmlns="http://archive.org/scribe/xml"', '')
-                scandata = ET.fromstring(scan_file_string)
-            except:
                 if args.v:
-                    print 'error reading scandata file: ', scandata_file
-                continue
+                    print 'scandata_file: ', scandata_file
 
-            scandata_pages = scandata.find('pageData').findall('page')
+                t = clock()
 
-            if args.v:
-                print 'Loaded', len(scandata_pages), ' scandata pages in', clock() - t, 's'
-
-            ia_page_index = 0
-            scandata_index = 0
-
-            for page in scandata_pages:
-
-                if (skipScanDataPage(page)):
-                    scandata_index += 1
+                try:
+                    scan_file = open(scandata_file)
+                    scan_file_string = scan_file.read()
+                    scan_file_string = scan_file_string.replace('xmlns="http://archive.org/scribe/xml"', '')
+                    scandata = ET.fromstring(scan_file_string)
+                except:
+                    if args.v:
+                        print 'error reading scandata file: ', scandata_file
                     continue
 
-                db_item = collection.find_one({'scan_id': row[0], 'ia_page_num': ia_page_index})
+                scandata_pages = scandata.find('pageData').findall('page')
 
-                if (db_item is None):
+                if args.v:
+                    print 'Loaded', len(scandata_pages), ' scandata pages in', clock() - t, 's'
+
+                ia_page_index = 0
+                scandata_index = 0
+
+                for page in scandata_pages:
+
+                    if (skipScanDataPage(page)):
+                        scandata_index += 1
+                        continue
+
+                    # db_item = collection.find_one({'scan_id': row[0], 'ia_page_num': ia_page_index})
+
+                    # if (db_item is None):
 
                     info = {
                         'scan_id': row[0],
@@ -98,17 +107,23 @@ if __name__ == "__main__":
                         'contrast_complete': False
                     }
 
-                    collection.insert(info)
+                    json.dump(info, outfile)
+                    outfile.write("\n")
+
+
+                    #collection.insert(info)
 
                     if args.v:
-                        print ia_page_index, 'inserted'
+                        print 'Inserted page in', clock() - t, 's'
 
-                else:
-                    if args.v:
-                        print ia_page_index, 'exists'
+                    # else:
+                    #     if args.v:
+                    #         print ia_page_index, 'exists'
 
-                ia_page_index += 1
-                scandata_index += 1
+                    ia_page_index += 1
+                    scandata_index += 1
+
+        rowCount += 1
 
     control_file.close()
 
