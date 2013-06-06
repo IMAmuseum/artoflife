@@ -39,12 +39,16 @@ def processPage(page, abbyyParsed):
                 page['abbyy'] = result
                 page['has_illustration']['abbyy'] = result['image_detected']
                 page['abbyy_complete'] = True
+                page['abbyy_processing_duration'] = time() - startTime
+                helper.log.debug('ABBYY Processing duration: %s' % (page['abbyy_processing_duration']))
 
         if (page['compression_complete'] is False):
             result = compression.processImage(page)
             if (result is not False):
                 page.update(result)
                 page['compression_complete'] = True
+                page['compression_processing_duration'] = time() - startTime
+                helper.log.debug('Compression Processing duration: %s' % (page['compression_processing_duration']))
 
         if (page['contrast_complete'] is False):
             result = contrast.processImage(page)
@@ -52,6 +56,8 @@ def processPage(page, abbyyParsed):
                 page.update(result)
                 page['has_illustration']['contrast'] = result['image_detected']
                 page['contrast_complete'] = True
+                page['contrast_processing_duration'] = time() - startTime
+                helper.log.debug('Contrast Processing duration: %s' % (page['contrast_processing_duration']))
 
         page['processing_lock'] = False
         page['processing_lock_end'] = time()
