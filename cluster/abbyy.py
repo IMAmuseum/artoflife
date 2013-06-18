@@ -8,29 +8,22 @@ def parseABBYY(scanId):
     abbyy_file = '%s/scandata/%s/%s_abbyy.gz' % (helper.base_path, scanId, scanId)
     helper.log.debug("abbyy_file: %s" % (abbyy_file))
     f = gzip.open(abbyy_file)
-    parsed = ET.parse(f)
-    abbyy_pages = parsed.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
-    parsed = None
+    abbyy_pages = []
+    pageNum = 0
+    for event, elem in ET.iterparse(f):
+        if event == 'end' and elem.tag == '{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page':
+            abbyy_pages.append(processABBYY(elem, pageNum))
+            pageNum += 1
+            elem.clear()
+
     f.close()
+    helper.log.debug("ABBYY Reading Complete for pages: %s" % (pageNum))
     return abbyy_pages
 
 
-def processABBYY(page, abbyy):
+def processABBYY(abbyy_page, pageNum):
 
     try:
-        scan_id = page['scan_id']
-        helper.log.debug("ABBYY for scan_id: %s page_num: %s" % (scan_id, page['ia_page_num']))
-        # helper.fetch_files(scan_id)
-        # abbyy_file = '%s/scandata/%s/%s_abbyy' % (helper.base_path, scan_id, scan_id)
-
-        # helper.log.debug("abbyy_file: %s" % (abbyy_file))
-        # f = open(abbyy_file)
-        # abbyy = ET.parse(f)
-        # f.close()
-        # abbyy_pages = abbyy.findall('{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page')
-
-        abbyy_page = abbyy[page['scandata_index']]
-
         result = {
             'width': int(abbyy_page.attrib['width']),
             'height': int(abbyy_page.attrib['height']),
@@ -59,8 +52,8 @@ def processABBYY(page, abbyy):
                 result['coverage_max'] = max(result['coverage_max'], area)
                 result['image_detected'] = True
 
-        helper.log.debug("ABBYY Complete for scan_id: %s page_num: %s" % (scan_id, page['ia_page_num']))
+        # helper.log.debug("ABBYY Complete for page_num: %s" % (pageNum))
         return result
     except:
-        helper.log.error("error processing ABBYY for scan_id %s page_num: %s" % (scan_id, page['ia_page_num']))
+        helper.log.error("ABBYY Error processing for page_num: %s" % (pageNum))
         return False

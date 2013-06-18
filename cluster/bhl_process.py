@@ -14,10 +14,12 @@ def processCollection():
         pages.close()
 
         pages = getPagesForProcessing(collection)
+        pages = None
 
 
 def processPages(pages, collection):
     abbyyParsed = None
+
     for page in pages:
         if abbyyParsed is None:
             abbyyParsed = abbyy.parseABBYY(page['scan_id'])
@@ -34,7 +36,7 @@ def processPage(page, abbyyParsed):
         startTime = time()
         helper.log.debug('Starting Processing for scan_id: %s' % (page['scan_id']))
         if (page['abbyy_complete'] is False):
-            result = abbyy.processABBYY(page, abbyyParsed)
+            result = abbyyParsed[page['scandata_index']]
             if (result is not False):
                 page['abbyy'] = result
                 page['has_illustration']['abbyy'] = result['image_detected']
