@@ -1,15 +1,20 @@
 import os
 from PIL import Image
 import helper
+import subprocess
+import ipdb
 
-
-def convert(working_file, command):
-    os.system('convert ' + working_file + ' ' + command + ' ' + working_file)
-
+def convert(working_file, commands):
+    cstack = ['/usr/bin/convert', working_file]
+    for c in commands:
+        cstack.append(c)
+    cstack.append(working_file)
+    p = subprocess.Popen(cstack)
+    p.communicate()
 
 def processImage(page, pct_thresh=10):
-
     try:
+        #ipdb.set_trace()
         helper.log.debug("contrast for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
 
         img = helper.getIAImage(page['scan_id'], page['ia_page_num'])
@@ -24,27 +29,25 @@ def processImage(page, pct_thresh=10):
         working_file = '%s/%s/%s_contrast_%s.png' % (base_path, page['scan_id'], page['scan_id'], page['ia_page_num'])
 
         img.save(working_file)
-
         # desaturate
-        convert(working_file, '-colorspace Gray')
+        convert(working_file, ['-colorspace', 'Gray'])
 
         # apply heavy contrast
-        convert(working_file, '-contrast -contrast -contrast -contrast -contrast -contrast -contrast -contrast')
+        convert(working_file, ['-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast'])
 
         processing_size = 500
 
         # resize to 1px width
-        convert(working_file, '-resize 1x%d!' % (processing_size))
+        convert(working_file, ['-resize', '1x%d!' % (processing_size)])
 
         # sharpen
-        convert(working_file, '-sharpen 0x5')
+        convert(working_file, ['-sharpen', '0x5'])
 
         # convert to grayscale
-        convert(working_file, '-negate -threshold 0 -negate')
+        convert(working_file, ['-negate', '-threshold', '0', '-negate'])
 
         # identify long lines
         w_compressed = Image.open(working_file)
-
         info = {
             'max_contiguous': 0,
             'image_detected': False,
