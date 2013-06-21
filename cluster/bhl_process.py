@@ -36,13 +36,14 @@ def processPage(page, abbyyParsed):
         startTime = time()
         helper.log.debug('Starting Processing for scan_id: %s' % (page['scan_id']))
         if (page['abbyy_complete'] is False):
-            result = abbyyParsed[page['scandata_index']]
-            if (result is not False):
-                page['abbyy'] = result
-                page['has_illustration']['abbyy'] = result['image_detected']
-                page['abbyy_complete'] = True
-                page['abbyy_processing_duration'] = time() - startTime
-                helper.log.debug('ABBYY Processing duration: %s' % (page['abbyy_processing_duration']))
+            if page['scandata_index'] in abbyyParsed:
+                result = abbyyParsed[page['scandata_index']]
+                if (result is not False):
+                    page['abbyy'] = result
+                    page['has_illustration']['abbyy'] = result['image_detected']
+                    page['abbyy_complete'] = True
+                    page['abbyy_processing_duration'] = time() - startTime
+                    helper.log.debug('ABBYY Processing duration: %s' % (page['abbyy_processing_duration']))
 
         if (page['compression_complete'] is False):
             result = compression.processImage(page)
