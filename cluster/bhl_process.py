@@ -14,7 +14,6 @@ def processCollection():
         pages.close()
 
         pages = getPagesForProcessing(collection)
-        pages = None
 
 
 def processPages(pages, collection):
