@@ -35,7 +35,7 @@ def processPage(page, abbyyParsed):
         startTime = time()
         helper.log.debug('Starting Processing for scan_id: %s' % (page['scan_id']))
         if (page['abbyy_complete'] is False):
-            if page['scandata_index'] in abbyyParsed:
+            if page['scandata_index'] <= len(abbyyParsed):
                 result = abbyyParsed[page['scandata_index']]
                 if (result is not False):
                     page['abbyy'] = result
