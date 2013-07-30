@@ -50,7 +50,7 @@ def processABBYY(abbyy_page, pageNum):
                 result['coverage_max'] = max(result['coverage_max'], area)
                 result['image_detected'] = True
 
-        # helper.log.debug("ABBYY Complete for page_num: %s" % (pageNum))
+        helper.log.debug("ABBYY Complete for page_num: %s" % (pageNum))
         return result
     except:
         helper.log.error("ABBYY Error processing for page_num: %s" % (pageNum))

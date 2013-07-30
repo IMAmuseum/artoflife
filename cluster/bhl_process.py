@@ -64,7 +64,7 @@ def processPage(page, abbyyParsed):
         page['processing_lock'] = False
         page['processing_lock_end'] = time()
 
-        if (page['abbyy_complete'] is False and page['compression_complete'] is False and page['contrast_complete'] is False):
+        if (page['abbyy_complete'] is False or page['compression_complete'] is False or page['contrast_complete'] is False):
             page['processing_error'] = True
 
         helper.log.debug('Complete: %s|%s: abbyy: %s, compression: %s, contrast: %s' %
