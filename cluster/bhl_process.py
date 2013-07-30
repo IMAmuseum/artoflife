@@ -43,6 +43,8 @@ def processPage(page, abbyyParsed):
                     page['abbyy_complete'] = True
                     page['abbyy_processing_duration'] = time() - startTime
                     helper.log.debug('ABBYY Processing duration: %s' % (page['abbyy_processing_duration']))
+            else:
+                page['abbyy_error'] = 'out of range %s' % (page['scandata_index'])
 
         if (page['compression_complete'] is False):
             result = compression.processImage(page)
