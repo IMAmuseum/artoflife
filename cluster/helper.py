@@ -13,6 +13,7 @@ base_url = 'http://www.archive.org'
 log = logging.getLogger('helper')
 log.setLevel(logging.DEBUG)
 log.addHandler(logging.StreamHandler())
+onCluster = False
 
 
 def mongoConnect():
@@ -71,11 +72,19 @@ def fetch_files(scan):
 
     if not os.path.exists(abbyyLocalPath):
         try:
-            url = '%(url)s/download/%(scan)s/%(file)s' % {
-                'scan': scan,
-                'file': abbyy_file,
-                'url': base_url
-            }
+            if (onCluster == False):
+                url = '%(url)s/download/%(scan)s/%(file)s' % {
+                    'scan': scan,
+                    'file': abbyy_file,
+                    'url': base_url
+                }
+            else:
+                url = '%(url)s/download/%(scan_first)s/%(scan)s/%(file)s' % {
+                    'scan': scan,
+                    'scan_first': scan[0],
+                    'file': abbyy_file,
+                    'url': base_url
+                }
             f = urllib2.urlopen(url)
             with open(abbyyLocalPath, "wb") as local_file:
                 local_file.write(f.read())
@@ -89,11 +98,19 @@ def fetch_files(scan):
 
     if not os.path.exists(scanLocalPath):
         try:
-            url = '%(url)s/download/%(scan)s/%(file)s' % {
-                'scan': scan,
-                'file': scandata_file,
-                'url': base_url
-            }
+            if (onCluster == False):
+                url = '%(url)s/download/%(scan)s/%(file)s' % {
+                    'scan': scan,
+                    'file': scandata_file,
+                    'url': base_url
+                }
+            else:
+                url = '%(url)s/download/%(scan_first)s/%(scan)s/%(file)s' % {
+                    'scan': scan,
+                    'scan_first': scan[0],
+                    'file': scandata_file,
+                    'url': base_url
+                }
 
             f = urllib2.urlopen(url)
             with open(scanLocalPath, "wb") as local_file:
