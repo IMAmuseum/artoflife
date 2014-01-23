@@ -3,8 +3,10 @@ import os
 from cStringIO import StringIO
 from PIL import Image
 from urllib import urlopen
+from urllib import urlretrieve
 import logging
 import urllib2
+import shutil
 from xml.etree import cElementTree as ET
 
 
@@ -37,13 +39,21 @@ def getIAImage(book_id, ia_page_index):
 
     url = '%s/download/%s/page/n%s' % (base_url, book_id, ia_page_index)
     log.debug("fetching image: %s" % (url))
-    img_file = StringIO(urlopen(url).read())
-    image = Image.open(img_file)
-    image.save(tmp_file)
+    #img_file = StringIO(urlopen(url).read())
+    #image = Image.open(img_file)
+    #image.save(tmp_file)
+    urlretrieve(url, tmp_file);
+    
     log.debug("saved image: %s" % (tmp_file))
     os.chmod(tmp_file, 0664)
 
-    return image
+    return Image.open(tmp_file) 
+
+
+def removeIAImages(book_id):
+
+    tmp_path = '%s/%s' % (base_path, book_id);
+    shutil.rmtree(tmp_path);
 
 
 def fetch_files(scan):
