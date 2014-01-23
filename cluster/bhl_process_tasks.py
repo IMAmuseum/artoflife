@@ -5,17 +5,6 @@ import helper
 from time import time
 
 
-def processCollection():
-    collection = helper.mongoConnect()
-
-    pages = getPagesForProcessing(collection)
-    while (pages is not None):
-        processPages(pages, collection)
-        pages.close()
-
-        pages = getPagesForProcessing(collection)
-
-
 def processPages(pages, collection):
     abbyyParsed = None
     scanId = None
@@ -106,9 +95,3 @@ def getPagesForProcessing(collection):
         # page['processing_lock_start'] = time()
         # collection.save(page)
         return pages
-
-
-if __name__ == '__main__':
-    helper.log.debug("starting processing")
-    processCollection()
-    helper.log.debug("end processing")
