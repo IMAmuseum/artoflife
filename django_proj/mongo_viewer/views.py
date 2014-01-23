@@ -122,10 +122,10 @@ def coverageHistogram(request):
     collection = getMongoCollection('page_data')
 
     data = []
-    for page in collection.find({}):
+    for page in collection.find({"abbyy_complete":True,"abbyy.image_detected":True}):
         if (page['abbyy_complete']):
-            if ('coverage_sum' in page['abbyy']):
-                data.append(page['abbyy']['coverage_sum'])
+            if ('total_coverage_sum' in page['abbyy']):
+                data.append(page['abbyy']['total_coverage_sum'])
 
     return createHistogram(data, 'Sum of Picture Block Coverage')
 
@@ -203,13 +203,23 @@ def parallelCoordinates(request):
 
     for page in getMongoCollection('page_data').find({}):
 
-        coverage_sum = page['abbyy']['coverage_sum'] if 'coverage_sum' in page['abbyy'] else 0
+        coverage_sum = 0
+        if ("abbyy" in page):
+            coverage_sum = page['abbyy']['coverage_sum'] if 'coverage_sum' in page['abbyy'] else 0
+
+        contrastVal = 0
+        if ("contrast" in page):
+            contrastVal = round(100 * page['contrast']['max_contiguous'], 2)
+
+        compVal = 0;
+        if ("compression" in page):
+            compVal = round(100 * page['compression'], 2);
 
         data = {
             'gold': page['has_illustration']['gold_standard'],
             'cov': round(coverage_sum, 2),
-            'comp': round(100 * page['compression'], 2),
-            'cont': round(100 * page['contrast']['max_contiguous'], 2)
+            'comp': compVal,
+            'cont': contrastVal
         }
 
         if (page['has_illustration']['gold_standard']):
