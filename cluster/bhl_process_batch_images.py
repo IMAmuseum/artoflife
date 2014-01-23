@@ -11,8 +11,8 @@ def processCollection():
     while (pages is not None):
        processPages(pages, collection)
        pages.close()
-       pages = None
-       # pages = getPagesForProcessing(collection)
+       #pages = None
+       pages = getPagesForProcessing(collection)
 
 def processPages(pages, collection):
     abbyyParsed = None
