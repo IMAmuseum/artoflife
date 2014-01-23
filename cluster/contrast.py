@@ -2,7 +2,9 @@ import os
 from PIL import Image
 import helper
 import subprocess
-import ipdb
+#import ipdb
+import shutil
+import sys
 
 def convert(working_file, commands):
     cstack = ['/usr/bin/convert', working_file]
@@ -26,9 +28,11 @@ def processImage(page, pct_thresh=10):
         if not os.path.exists('%s/%s' % (base_path, page['scan_id'])):
             os.mkdir('%s/%s' % (base_path, page['scan_id']))
 
+        imgPath = '%s/%s/%s.jpeg' % (helper.base_path, page['scan_id'], page['ia_page_num']) 
         working_file = '%s/%s/%s_contrast_%s.png' % (base_path, page['scan_id'], page['scan_id'], page['ia_page_num'])
+        shutil.copyfile(imgPath, working_file)
 
-        img.save(working_file)
+        #img.save(working_file)
         # desaturate
         convert(working_file, ['-colorspace', 'Gray'])
 
@@ -73,6 +77,8 @@ def processImage(page, pct_thresh=10):
         helper.log.debug("contrast complete for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
 
         return info
-    except:
+    except Exception as e:
+        helper.log.exception(e)
+        helper.log.error("Unexpected error: %s", (sys.exc_info()[0]))
         helper.log.error("contrast error for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
         return False
