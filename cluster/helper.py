@@ -7,6 +7,8 @@ from urllib import urlretrieve
 import logging
 import urllib2
 import shutil
+import requests
+import zipfile
 from xml.etree import cElementTree as ET
 
 
@@ -22,6 +24,7 @@ def mongoConnect():
     log.debug("connecting to mongo")
     mongo_conn = pymongo.Connection('localhost', 27017)
     mongo_db = mongo_conn.artoflife
+    log.debug("mongo connection established")
     return mongo_db.page_data
 
 
@@ -43,11 +46,11 @@ def getIAImage(book_id, ia_page_index):
     #image = Image.open(img_file)
     #image.save(tmp_file)
     urlretrieve(url, tmp_file);
-    
+
     log.debug("saved image: %s" % (tmp_file))
     os.chmod(tmp_file, 0664)
 
-    return Image.open(tmp_file) 
+    return Image.open(tmp_file)
 
 
 def removeIAImages(book_id):
@@ -162,3 +165,55 @@ def fetch_files(scan):
                     log.error("URL Error:", e.reason, url)
         except urllib2.URLError, e:
             log.error("URL Error:", e.reason, url)
+
+
+def fetchAllImages(book_id):
+    metaUrl = '%(url)s/metadata/%(bookid)s/files' % {
+        'url': base_url,
+        'bookid': book_id
+    }
+
+    r = requests.get(url = metaUrl)
+    imagePackageFilename = None
+
+    if (r.status_code == 200):
+        data = r.json()
+        for fileMeta in data['result']:
+            if fileMeta['format'] == "Single Page Processed JP2 ZIP":
+                imagePackageFilename = fileMeta['name']
+    else:
+        log.error("Error getting book metadata file", r.status_code, metaUrl)
+
+    if imagePackageFilename is None:
+        log.error("No Image Package File Name Found:", book_id)
+        return None
+
+    imageUrl = '%(url)s/download/%(bookid)s/%(filename)s' % {
+        'url': base_url,
+        'bookid': book_id,
+        'filename': imagePackageFilename
+    }
+
+    tmp_file = '%s/%s/%s' % (base_path, book_id, imagePackageFilename)
+
+    if not os.path.exists(base_path):
+        os.mkdir(base_path)
+    if not os.path.exists('%s/%s' % (base_path, book_id)):
+        os.mkdir('%s/%s' % (base_path, book_id))
+    if os.path.isfile(tmp_file):
+        log.debug("loading package: %s" % (tmp_file))
+
+    log.debug("fetching image package: %s" % (imageUrl))
+    urlretrieve(imageUrl, tmp_file);
+
+    log.debug("saved image package: %s" % (tmp_file))
+    os.chmod(tmp_file, 0664)
+
+    tempLocation = '%s/%s/' % (base_path, book_id)
+
+    zfile = zipfile.ZipFile(tmp_file)
+    log.debug("extracting images")
+    zfile.extractall(tempLocation)
+    zfile.close()
+
+    return True

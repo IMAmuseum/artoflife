@@ -2,7 +2,6 @@ import os
 from PIL import Image
 import helper
 import subprocess
-#import ipdb
 import shutil
 import sys
 
@@ -14,12 +13,17 @@ def convert(working_file, commands):
     p = subprocess.Popen(cstack)
     p.communicate()
 
+def convertToPng(jp2Path, pngPath):
+    cstack = ['/usr/bin/convert', jp2Path, pngPath]
+    p = subprocess.Popen(cstack)
+    p.communicate()
+
 def processImage(page, pct_thresh=10):
     try:
         #ipdb.set_trace()
         helper.log.debug("contrast for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
 
-        img = helper.getIAImage(page['scan_id'], page['ia_page_num'])
+        # img = helper.getIAImage(page['scan_id'], page['ia_page_num'])
 
         base_path = '%s/contrast' % (helper.base_path)
 
@@ -28,9 +32,13 @@ def processImage(page, pct_thresh=10):
         if not os.path.exists('%s/%s' % (base_path, page['scan_id'])):
             os.mkdir('%s/%s' % (base_path, page['scan_id']))
 
-        imgPath = '%s/%s/%s.jpeg' % (helper.base_path, page['scan_id'], page['ia_page_num']) 
+        # imgPath = '%s/%s/%s.jpeg' % (helper.base_path, page['scan_id'], page['ia_page_num'])
+        imgPath = '%s/%s/%s_jp2/%s_%s.jp2' % (helper.base_path, page['scan_id'], page['scan_id'], page['scan_id'], str(page['ia_page_num']).zfill(4))
         working_file = '%s/%s/%s_contrast_%s.png' % (base_path, page['scan_id'], page['scan_id'], page['ia_page_num'])
-        shutil.copyfile(imgPath, working_file)
+        #shutil.copyfile(imgPath, working_file)
+        helper.log.debug('converting image to png: %s => %s' % (imgPath, working_file))
+
+        convertToPng(imgPath, working_file)
 
         #img.save(working_file)
         # desaturate
