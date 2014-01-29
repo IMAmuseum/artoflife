@@ -5,6 +5,14 @@ import subprocess
 import shutil
 import sys
 
+def combinedConvert(working_file, commands, output_file):
+    cstack = ['/usr/bin/convert', working_file]
+    for c in commands:
+        cstack.append(c)
+    cstack.append(output_file)
+    p = subprocess.Popen(cstack)
+    p.communicate()
+
 def convert(working_file, commands):
     cstack = ['/usr/bin/convert', working_file]
     for c in commands:
@@ -38,25 +46,31 @@ def processImage(page, pct_thresh=10):
         #shutil.copyfile(imgPath, working_file)
         helper.log.debug('converting image to png: %s => %s' % (imgPath, working_file))
 
-        convertToPng(imgPath, working_file)
+        # convertToPng(imgPath, working_file)
 
         #img.save(working_file)
         # desaturate
-        convert(working_file, ['-colorspace', 'Gray'])
+        # convert(working_file, ['-colorspace', 'Gray'])
 
         # apply heavy contrast
-        convert(working_file, ['-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast'])
+        # convert(working_file, ['-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast'])
 
         processing_size = 500
 
         # resize to 1px width
-        convert(working_file, ['-resize', '1x%d!' % (processing_size)])
+        # convert(working_file, ['-resize', '1x%d!' % (processing_size)])
 
         # sharpen
-        convert(working_file, ['-sharpen', '0x5'])
+        # convert(working_file, ['-sharpen', '0x5'])
 
         # convert to grayscale
-        convert(working_file, ['-negate', '-threshold', '0', '-negate'])
+        # convert(working_file, ['-negate', '-threshold', '0', '-negate'])
+
+        combinedConvert(
+            imgPath,
+            ['-colorspace', 'Gray', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-resize', '1x500!', '-sharpen', '0x5', '-negate', '-threshold', '0', '-negate'],
+            working_file
+        )
 
         # identify long lines
         w_compressed = Image.open(working_file)
