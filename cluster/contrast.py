@@ -4,6 +4,7 @@ import helper
 import subprocess
 import shutil
 import sys
+from time import time
 
 def combinedConvert(working_file, commands, output_file):
     cstack = ['/usr/bin/convert', working_file]
@@ -27,6 +28,7 @@ def convertToPng(jp2Path, pngPath):
     p.communicate()
 
 def processImage(page, pct_thresh=10):
+    startTime = time()
     try:
         #ipdb.set_trace()
         helper.log.debug("contrast for scan_id: %s page_num: %s" % (page['scan_id'], page['ia_page_num']))
@@ -44,7 +46,7 @@ def processImage(page, pct_thresh=10):
         imgPath = '%s/%s/%s_jp2/%s_%s.jp2' % (helper.base_path, page['scan_id'], page['scan_id'], page['scan_id'], str(page['ia_page_num']).zfill(4))
         working_file = '%s/%s/%s_contrast_%s.png' % (base_path, page['scan_id'], page['scan_id'], page['ia_page_num'])
         #shutil.copyfile(imgPath, working_file)
-        helper.log.debug('converting image to png: %s => %s' % (imgPath, working_file))
+        #helper.log.debug('converting image to png: %s => %s' % (imgPath, working_file))
 
         # convertToPng(imgPath, working_file)
 
@@ -66,11 +68,18 @@ def processImage(page, pct_thresh=10):
         # convert to grayscale
         # convert(working_file, ['-negate', '-threshold', '0', '-negate'])
 
+        helper.log.debug('Converting Image')
+
         combinedConvert(
             imgPath,
             ['-colorspace', 'Gray', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-contrast', '-resize', '1x500!', '-sharpen', '0x5', '-negate', '-threshold', '0', '-negate'],
             working_file
         )
+
+        convertTime = time() - startTime
+        helper.log.debug('Contrast convert duration: %s' % (convertTime))
+
+        processStartTime = time()
 
         # identify long lines
         w_compressed = Image.open(working_file)
@@ -90,6 +99,9 @@ def processImage(page, pct_thresh=10):
 
         del w_compressed
         os.remove(working_file)
+
+        processTime = time() - processStartTime
+        helper.log.debug('Contrast Process duration: %s' % (processTime))
 
         info['max_contiguous'] = float(info['max_contiguous']) / processing_size
 
