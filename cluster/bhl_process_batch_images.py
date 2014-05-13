@@ -19,19 +19,31 @@ def processPages(pages, collection):
     imagesDownloaded = None
     scanId = None
 
-    for page in pages:
-        if abbyyParsed is None:
-            abbyyParsed = abbyy.parseABBYY(page['scan_id'])
+    try:
+        for page in pages:
+            if abbyyParsed is None:
+                abbyyParsed = abbyy.parseABBYY(page['scan_id'])
 
-        if imagesDownloaded is None:
-            imagesDownloaded = helper.fetchAllImages(page['scan_id'])
+            if imagesDownloaded is None:
+                imagesDownloaded = helper.fetchAllImages(page['scan_id'])
 
-        processPage(page, abbyyParsed)
+            if imagesDownloaded is false:
+                raise NameError('NoImages')             
+
+            processPage(page, abbyyParsed)
+            saveId = collection.save(page)
+            scanId = page['scan_id']
+            helper.log.debug('Save id: %s' % (saveId))
+    except:
+        helper.log.debug('Error processing pages')
+        page['processing_error'] = True
         saveId = collection.save(page)
-        scanId = page['scan_id']
-        helper.log.debug('Save id: %s' % (saveId))
 
-    helper.removeIAImages(scanId);
+    try:
+        helper.removeIAImages(scanId)
+    except:
+        helper.log.debug('Can\'t remove images')
+
 
 def processPage(page, abbyyParsed):
     if page is None:
@@ -98,7 +110,7 @@ def getPagesForProcessing(collection):
         scanId = page['scan_id']
         helper.log.debug("Scan Id found: %s" % (scanId))
         helper.log.debug("Locking Records")
-        collection.update({'scan_id': scanId}, {'$set': {'processing_lock': True, 'processing_lock_start': time()}})
+        collection.update({'scan_id': scanId}, {'$set': {'processing_lock': True, 'processing_lock_start': time()}}, multi=True)
         helper.log.debug("Getting all pages for %s" % (scanId))
         pages = collection.find({
             'scan_id': scanId

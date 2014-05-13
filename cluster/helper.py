@@ -12,7 +12,7 @@ import zipfile
 from xml.etree import cElementTree as ET
 
 
-base_path = '/tmp/ia'
+base_path = '/home/kjaebker/tmp'
 base_url = 'http://www.archive.org'
 log = logging.getLogger('helper')
 log.setLevel(logging.DEBUG)
@@ -22,7 +22,7 @@ onCluster = False
 
 def mongoConnect():
     log.debug("connecting to mongo")
-    mongo_conn = pymongo.Connection('localhost', 27017)
+    mongo_conn = pymongo.Connection('localhost', 12456)
     mongo_db = mongo_conn.artoflife
     log.debug("mongo connection established")
     return mongo_db.page_data
@@ -105,9 +105,9 @@ def fetch_files(scan):
             f.close()
             log.debug("abbyy file saved: %s" % (abbyyLocalPath))
         except urllib2.HTTPError, e:
-            log.error("HTTP Error:", e.code, url)
+            log.error("HTTP Error: %s:%s", e.code, url)
         except urllib2.URLError, e:
-            log.error("URL Error:", e.reason, url)
+            log.error("URL Error %s:%s:", e.reason, url)
 
     if not os.path.exists(scanLocalPath):
         try:
@@ -165,6 +165,8 @@ def fetch_files(scan):
                     log.error("URL Error:", e.reason, url)
         except urllib2.URLError, e:
             log.error("URL Error:", e.reason, url)
+        except IOError, e:
+            log.error("IO Error:", "File not found?", url)
 
 
 def fetchAllImages(book_id):
@@ -211,9 +213,13 @@ def fetchAllImages(book_id):
 
     tempLocation = '%s/%s/' % (base_path, book_id)
 
-    zfile = zipfile.ZipFile(tmp_file)
-    log.debug("extracting images")
-    zfile.extractall(tempLocation)
-    zfile.close()
+    try:
+        zfile = zipfile.ZipFile(tmp_file)
+        log.debug("extracting images")
+        zfile.extractall(tempLocation)
+        zfile.close()
+    except:
+        log.error("error extracting images: %s", tmp_file)
+        return False
 
     return True

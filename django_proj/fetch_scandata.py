@@ -45,11 +45,12 @@ def fetch_files(scan):
             }
 
             f = urllib2.urlopen(url)
+            print "Successfully found scandata file: ", url
             with open(scanLocalPath, "wb") as local_file:
                 local_file.write(f.read())
 
         except urllib2.HTTPError, e:
-            print "HTTP Error:", e.code, url
+            print "Initial Fetch HTTP Error:", e.code, url
             if (e.code == 404):
                 url = 'http://www.archive.org/services/find_file.php?file=%(scan)s&loconly=1' % {
                     'scan': scan
@@ -66,6 +67,7 @@ def fetch_files(scan):
                     }
                     try:
                         f = urllib2.urlopen(url)
+                        print "Successfully found scandata file: ", url
                         with open(scanLocalPath, "wb") as local_file:
                             local_file.write(f.read())
                     except urllib2.HTTPError, e:

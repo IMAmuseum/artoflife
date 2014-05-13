@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
         if (rowCount % 1000 == 0):
             fileNumber += 1
-            outputFileName = "scandata/json_load/data_%s.json" % (fileNumber)
+            outputFileName = "scandata/json_load/ima/data_%s.json" % (fileNumber)
 
         with open(outputFileName, 'a') as outfile:
 

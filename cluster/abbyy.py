@@ -7,8 +7,15 @@ def parseABBYY(scanId):
     helper.fetch_files(scanId)
     abbyy_file = '%s/scandata/%s/%s_abbyy.gz' % (helper.base_path, scanId, scanId)
     helper.log.debug("abbyy_file: %s" % (abbyy_file))
-    f = gzip.open(abbyy_file)
+
     abbyy_pages = []
+
+    try:
+        f = gzip.open(abbyy_file)
+    except:
+        helper.log.error("Error opening abbyy_file: %s", abbyy_file)
+        return abbyy_pages
+
     pageNum = 0
     for event, elem in ET.iterparse(f):
         if event == 'end' and elem.tag == '{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}page':
