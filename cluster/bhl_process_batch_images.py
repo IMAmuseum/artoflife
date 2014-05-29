@@ -2,6 +2,7 @@ import abbyy
 import compression
 import contrast
 import helper
+import ipdb
 from time import time
 
 def processCollection():
@@ -27,7 +28,8 @@ def processPages(pages, collection):
             if imagesDownloaded is None:
                 imagesDownloaded = helper.fetchAllImages(page['scan_id'])
 
-            if imagesDownloaded is false:
+            if imagesDownloaded is False:
+                helper.log.debug('Images Downloaded False')
                 raise NameError('NoImages')             
 
             processPage(page, abbyyParsed)

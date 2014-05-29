@@ -60,7 +60,7 @@ def processABBYY(abbyy_page, pageNum):
         charParams = abbyy_page.findall(".//{http://www.abbyy.com/FineReader_xml/FineReader6-schema-v1.xml}charParams");
         result['char_count'] = len(charParams)
             
-        helper.log.debug("char count: %s has image: %s page num: %s" % (result['char_count'], result['image_detected'], pageNum))
+        # helper.log.debug("char count: %s has image: %s page num: %s" % (result['char_count'], result['image_detected'], pageNum))
         # helper.log.debug("ABBYY Complete for page_num: %s" % (pageNum))
         return result
     except:
