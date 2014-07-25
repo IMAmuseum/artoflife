@@ -18,10 +18,10 @@ if __name__ == '__main__':
 
     export_date = time.strftime('%Y%m%d')
 
-    log.debug("updating records that need exported")
+    log.debug("updating records that need exported with today's date")
     collection.update(
-        {'abbyy_complete': True, 'contrast_complete': True, 'processing_error':False, 'exported': { '$exists' : False }},
-        {'$set': {'exported': False}},
+        {'abbyy_complete':True, 'contrast_complete':True, 'processing_error':False, 'processing_lock_end':{'$gt': 0}, 'exported':{'$exists':False}},
+        {'$set': {'exported': True, 'export_date': export_date}},
         multi=True
     )
 
@@ -32,6 +32,10 @@ if __name__ == '__main__':
     output_filename = 'export_%s_%s.json' % (server_name, export_date)
     output_file = '%s/%s' % (file_base_path, output_filename)
 
+    log.debug("waiting 120 seconds for database to calm down")
+    time.sleep(120);
+
+    query = '{"export_date" : "' + str(export_date) + '"}';
     cstack = [
         'mongoexport',
         '-h',
@@ -41,7 +45,7 @@ if __name__ == '__main__':
         '-c',
         'page_data',
         '-q',
-        '{"abbyy_complete" : true, "contrast_complete" : true, "processing_error" : false, "exported" : false }',
+        query,
         '-o',
         output_file
     ]
@@ -58,12 +62,5 @@ if __name__ == '__main__':
     ftp.storbinary('STOR ' + output_filename, file) # send the file
     file.close()                                    # close file and FTP
     ftp.quit()
-
-    log.debug("updating records as exported with date")
-    collection.update(
-        {"abbyy_complete" : True, "contrast_complete" : True, "processing_error" : False, "exported" : False },
-        {'$set': {'exported': True, 'export_date': export_date}},
-        multi=True
-    )
 
     log.debug("export complete")
