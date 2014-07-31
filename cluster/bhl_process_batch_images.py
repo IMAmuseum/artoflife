@@ -3,6 +3,7 @@ import compression
 import contrast
 import helper
 import ipdb
+import os
 from time import time
 
 def processCollection():
@@ -10,15 +11,21 @@ def processCollection():
 
     pages = getPagesForProcessing(collection)
     while (pages is not None):
-       processPages(pages, collection)
-       pages.close()
-       #pages = None
-       pages = getPagesForProcessing(collection)
+        processPages(pages, collection)
+        pages.close()
+        #pages = None
+        if os.path.exists("./stop.txt"):
+            print("Stop file found. Exiting.\n")
+            break
+        pages = getPagesForProcessing(collection)
+
 
 def processPages(pages, collection):
     abbyyParsed = None
     imagesDownloaded = None
     scanId = None
+    pageShift = 0
+    firstPass = False
 
     try:
         for page in pages:
@@ -30,24 +37,38 @@ def processPages(pages, collection):
 
             if imagesDownloaded is False:
                 helper.log.debug('Images Downloaded False')
-                raise NameError('NoImages')             
+                raise NameError('NoImages')
 
-            processPage(page, abbyyParsed)
+            # Determine if the page image exists. Our data starts counting at 0. Sometimes the pages start counting at 1.
+            if not firstPass: # we don't want to do this every time we loop
+                # Does the page 0 file exist?
+                imgPath = '%s/%s/%s_jp2/%s_%s.jp2' % (helper.base_path, page['scan_id'], page['scan_id'], page['scan_id'], '0000')
+                if not os.path.exists(imgPath):
+                    # No, we need to shift pages when we reference files on disk
+                    pageShift = 1
+                    firstPass = true
+
+
+            processPage(page, abbyyParsed, pageShift)
             saveId = collection.save(page)
             scanId = page['scan_id']
             helper.log.debug('Save id: %s' % (saveId))
-    except:
-        helper.log.debug('Error processing pages')
+
+        # Now that all pages are processed, clear the lock
+        collection.update({'scan_id': page['scan_id']}, {'$set': {'processing_lock': False, 'processing_lock_end': time()}}, multi=True)
+
+    except Exception, e:
+        helper.log.debug('Error processing pages:' + str(e))
         page['processing_error'] = True
         saveId = collection.save(page)
 
     try:
         helper.removeIAImages(scanId)
-    except:
-        helper.log.debug('Can\'t remove images')
+    except Exception, e:
+        helper.log.debug('Can\'t remove images' + str(e))
 
 
-def processPage(page, abbyyParsed):
+def processPage(page, abbyyParsed, pageShift):
     if page is None:
         helper.log.debug('No pages for processing')
         return
@@ -75,16 +96,13 @@ def processPage(page, abbyyParsed):
                 #helper.log.debug('Compression Processing duration: %s' % (page['compression_processing_duration']))
 
         if (page['contrast_complete'] is False):
-            result = contrast.processImage(page)
+            result = contrast.processImage(page, pageShift)
             if (result is not False):
                 page.update(result)
                 page['has_illustration']['contrast'] = result['image_detected']
                 page['contrast_complete'] = True
                 page['contrast_processing_duration'] = time() - startTime
                 helper.log.debug('Contrast Processing duration: %s' % (page['contrast_processing_duration']))
-
-        page['processing_lock'] = False
-        page['processing_lock_end'] = time()
 
         #if (page['abbyy_complete'] is False or page['compression_complete'] is False or page['contrast_complete'] is False):
         if (page['abbyy_complete'] is False or page['contrast_complete'] is False):
@@ -122,5 +140,8 @@ def getPagesForProcessing(collection):
 
 if __name__ == '__main__':
     helper.log.debug("starting processing")
+    if os.path.exists("./stop.txt"):
+        os.rename("./stop.txt","./start.txt")
+
     processCollection()
     helper.log.debug("end processing")
