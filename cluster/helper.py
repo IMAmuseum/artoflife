@@ -130,10 +130,10 @@ def fetch_files(scan):
                 local_file.write(f.read())
             os.chmod(scanLocalPath, 0664)
             f.close()
-            log.debug("scandata file saved: %s" % (scanLocalPath))
+            log.debug("scandata file saved: %s", scanLocalPath)
 
         except urllib2.HTTPError, e:
-            log.error("HTTP Error:", e.code, url)
+            log.error("HTTP Error: %d %s", e.code, url)
             if (e.code == 404):
                 url = '%(url)s/services/find_file.php?file=%(scan)s&loconly=1' % {
                     'scan': scan,
@@ -156,17 +156,17 @@ def fetch_files(scan):
                         os.chmod(scanLocalPath, 0664)
                         f.close()
                     except urllib2.HTTPError, e:
-                        log.error("HTTP Error:", e.code, url)
+                        log.error("HTTP Error: %d %s", e.code, url)
                     except urllib2.URLError, e:
-                        log.error("URL Error:", e.reason, url)
+                        log.error("URL Error: %s %s", e.reason, url)
                 except urllib2.HTTPError, e:
-                    log.error("HTTP Error:", e.code, url)
+                    log.error("HTTP Error: %d %s", e.code, url)
                 except urllib2.URLError, e:
-                    log.error("URL Error:", e.reason, url)
+                    log.error("URL Error: %s %s", e.reason, url)
         except urllib2.URLError, e:
-            log.error("URL Error:", e.reason, url)
+            log.error("URL Error: %s %s", e.reason, url)
         except IOError, e:
-            log.error("IO Error:", "File not found?", url)
+            log.error("IO Error: File not found? %s", url)
 
 
 def fetchAllImages(book_id):
@@ -184,10 +184,10 @@ def fetchAllImages(book_id):
             if fileMeta['format'] == "Single Page Processed JP2 ZIP":
                 imagePackageFilename = fileMeta['name']
     else:
-        log.error("Error getting book metadata file", r.status_code, metaUrl)
+        log.error("Error getting book metadata file %d %s", r.status_code, metaUrl)
 
     if imagePackageFilename is None:
-        log.error("No Image Package File Name Found:", book_id)
+        log.error("No Image Package File Name Found: %s", book_id)
         return None
 
     imageUrl = '%(url)s/download/%(bookid)s/%(filename)s' % {
