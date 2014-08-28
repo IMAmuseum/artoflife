@@ -58,6 +58,12 @@ def removeIAImages(book_id):
     tmp_path = '%s/%s' % (base_path, book_id);
     shutil.rmtree(tmp_path);
 
+    tmp_path = '%s/scandata/%s' % (base_path, book_id);
+    shutil.rmtree(tmp_path);
+
+    tmp_path = '%s/contrast/%s' % (base_path, book_id);
+    shutil.rmtree(tmp_path);
+
 
 def fetch_files(scan):
 
